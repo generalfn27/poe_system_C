@@ -1,0 +1,87 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.28"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "inpr_project_devc_supported",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "cashier::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-cashier-Debug-b2f3d62e6c2418b8bfdc.json",
+					"name" : "cashier",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "customer::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-customer-Debug-5bf02d97ee204c99706d.json",
+					"name" : "customer",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "inpr_project_devc_supported::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-inpr_project_devc_supported-Debug-7d68fdc753f5e12a9947.json",
+					"name" : "inpr_project_devc_supported",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "poe::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-poe-Debug-6618bee37f34cc73449b.json",
+					"name" : "poe",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "E:/Clion/inpr_project_poe_system/cmake-build-debug",
+		"source" : "E:/Clion/inpr_project_poe_system"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}
