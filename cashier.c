@@ -3043,7 +3043,6 @@ int user_validate_manager_login(char username[], char password[]) {
 }
 
 void manager_menu() {
-
     int choice;
     do {
         system("cls");
