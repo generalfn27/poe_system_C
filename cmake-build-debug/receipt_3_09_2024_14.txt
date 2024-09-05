@@ -1,0 +1,5 @@
+Code,Name,Quantity,Price
+BEV000,C2 Solo,9,13.00
+
+Total Price: ,117.00
+Payment: ,117.00

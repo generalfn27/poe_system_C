@@ -10,6 +10,7 @@
 #define BOLD "\x1B[1m"
 #define MAX_CUSTOMERS 100
 #define CUSTOMER_FILE "customers.txt"
+#define MAX_ATTEMPTS 5
 
 // Structure to represent a product
 struct Product {
@@ -37,6 +38,8 @@ int customer_count = 0;
 int total_items = 0;
 float total_price = 0.0;
 char filename[256];
+
+
 
 
 //data for the products
@@ -75,10 +78,10 @@ struct Product snacks[] = {
         {"SNK010", "Martys", 7.00},
         {"SNK011", "Nagaraya", 20.25},
         {"SNK012", "Nova", 14.50},
-        {"SNK013", "Oish", 7.75},
+        {"SNK013", "Oishi", 7.75},
         {"SNK014", "Onion rings", 7.99},
         {"SNK015", "Peewee", 7.00},
-        {"SNK016", "Piatos", 14.25},
+        {"SNK016", "Piattos", 14.25},
         {"SNK017", "Pillows big", 8.50},
         {"SNK018", "Pillows small", 6.75},
         {"SNK019", "Pretzels", 8.99},
@@ -250,7 +253,7 @@ void guest_customer_item_category();
 void customer_register();
 
 //attempts para sa login
-void increment_attempts(int *attempt_count);
+void increment_attempts(int *attempt_count, char *username);
 void ask_to_go_back();
 void reset_attempts(int *attempt_count);
 
@@ -302,6 +305,8 @@ int read_queue_number(const char *filename);
 void user_cashier();
 void cashier_login();
 int validate_cashier_login(char username[], char password[]);
+void cashier_increment_attempts(int *attempt_count, char *username);
+
 void cashier_process_choice();
 void selecting_queue_list_to_process();
 void display_counter(struct Product counter[], int total_items, float total_price);
@@ -324,11 +329,37 @@ int get_confirmation(const char *message);
 int find_product_index(struct Product array[], int total_items, const char *code);
 
 
+
+//manager
+void user_manager();
+void manager_login();
+void manager_menu();
+int user_validate_manager_login(char username[], char password[]);
+void change_manager_password();
+void manager_code();
+
+
+
+// mga change pass functions
+void account_change_password();
+void account_retrieval();
+void change_cashier_password();
+
+void generate_default_admin_credentials();
+
+
+void account_user_change_password();
+
+void password_account_change(int customer_index);
+
+void user_retrieve_account(int customer_index);
+
+
 /*****END*********************END***********END***********END************END************END************END************END************END************END************END************END*****/
 
 int main()
 {
-    //system("color F0");
+    system("color F0"); //changes text color "F0", "F1", "F2" etc.
     user_type_choice();
 
     return 0;
@@ -337,30 +368,53 @@ int main()
 //asking if what user are you
 void user_type_choice()
 {
-    char user_type;
+    char user_type, exit_confirmation;
 
     do {
-        //system("cls");
-        printf("||======================================================||\n");
-        printf("||\t\t\t\t\t\t\t||\n");
-        printf("||\t\tWelcome to Fourgramming\t\t\t||\n");
-        printf("||\t\t\t\t\t\t\t||\n");
-        printf("||\t\tPlease chooser a user type\t\t||\n");
-        printf("||\t\t\t\t\t\t\t||\n");
-        printf("||\t\t\t\t\t\t\t||\n");
-        printf("||\t[1] Customer\t\t\t\t\t||\n");
-        printf("||\t[2] Cashier\t\t\t\t\t||\n");
-        printf("||\t[3] Manager\t\t\t\t\t||\n");
-        printf("||\t[0] Exit\t\t\t\t\t||\n");
-        printf("||\t\t\t\t\t\t\t||\n");
-        printf("||\t\t\t\t\t\t\t||\n");
-        printf("||======================================================||\n");
-        printf("\n\nType here: ");
+        system("cls");
+        printf("\t������������������������������������������������������������\n");
+        printf("\t�                                                          �\n");
+        printf("\t�                Welcome to Fourgramming                   �\n");
+        printf("\t�                                                          �\n");
+        printf("\t�               Please choose a user type:                 �\n");
+        printf("\t�                                                          �\n");
+        printf("\t�                                                          �\n");
+        printf("\t�                  [1] Customer                            �\n");
+        printf("\t�                  [2] Cashier                             �\n");
+        printf("\t�                  [3] Manager                             �\n");
+        printf("\t�                                                          �\n");
+        printf("\t�                  [0] Exit                                � \n");
+        printf("\t�                                                          �\n");
+        printf("\t�                                                          �\n");
+        printf("\t������������������������������������������������������������\n");
+
+        printf("\n\n\tType here: ");
         scanf(" %c", &user_type);
+
+        system("cls");
 
         switch (user_type)
         {
             case '0':
+                printf("\n\tAre you sure you want to close the program?\n");
+                printf("\t[Y] for Yes  [N] for No: ");
+                scanf(" %c", &exit_confirmation);
+
+                if(exit_confirmation == 'Y' || exit_confirmation == 'y'){
+                    system("cls");
+                    printf("\t============================================\n");
+                    printf("\t|                                          |\n");
+                    printf("\t|     Thank You for Using our Program!     |\n");
+                    printf("\t|                                          |\n");
+                    printf("\t============================================\n");
+                    break;
+                }else if(exit_confirmation == 'N' || exit_confirmation == 'n') {
+                    user_type_choice();
+                }else{
+                    printf("\tInvalid input. Going back to menu.\n");
+                    press_any_key();
+                    user_type_choice();
+                }
                 return;
             case '1':
                 user_customer();
@@ -369,7 +423,7 @@ void user_type_choice()
                 user_cashier();
                 break;
             case '3':
-                //user_manager();
+                user_manager();
                 break;
             default:
                 printf("\nInvalid input. Try again...\n");
@@ -385,17 +439,21 @@ void user_customer()
 {
     char choice;
 
-    //system("cls");
-    printf("||======================================================||\n");
-    printf("||\t\t\t\t\t\t\t||\n");
-    printf("||\t[1] Login as Existing Customer\t\t\t||\n");
-    printf("||\t[2] Continue as Guest\t\t\t\t||\n");
-    printf("||\t[3] Register\t\t\t\t\t||\n");
-    printf("||\t[0] Go Back\t\t\t\t\t||\n");
-    printf("||\t\t\t\t\t\t\t||\n");
-    printf("||======================================================||\n");
+    system("cls");
+    system("cls");
+    printf("\n");
+    printf("\t������������������������������������������������������\n");
+    printf("\t�              Welcome Customer!                     �\n");
+    printf("\t�             Log in  |  Register                    �\n");
+    printf("\t�                                                    �\n");
+    printf("\t�        [1] Login                    \t             �\n");
+    printf("\t�        [2] Continue as Guest                       �\n");
+    printf("\t�        [3] Register                                �\n");
+    printf("\t�        [0] Go Back                                 �\n");
+    printf("\t�                                                    �\n");
+    printf("\t������������������������������������������������������\n");
 
-    printf("\nEnter Here: ");
+    printf("\n\tEnter Here: ");
     scanf(" %c", &choice);
 
     switch (choice)
@@ -410,9 +468,9 @@ void user_customer()
             customer_register();
             break;
         case '0':
-            user_type_choice();
+            return;
         default:
-            printf("\nInvalid input. Try again...\n");
+            printf("\n\tInvalid input. Try again...\n");
             press_any_key();
     }
 }
@@ -427,31 +485,35 @@ void guest_customer_item_category()
 
     while (1)
     {
-        //system("cls");
-        printf("\nNOTE: THE PROMO CODES WILL APPLY ONLY TO THE CUSTOMER WHO SPEND ABOVE 200 PESOS\n");
+        system("cls");
+        printf("\n\t              *    �������������������������������������������������������   *\n");
+        printf("\t                �                         Welcome!                          �\n");
+        printf("\t                �               What do you want to browse?                 �\n");
+        printf("\t                �                                                           �\n");
+        printf("\t                �              [1] Beverages                                �\n");
+        printf("\t                �              [2] Snacks                                   �\n");
+        printf("\t                �              [3] Canned Goods                             �\n");
+        printf("\t                �              [4] Condiments                               �\n");
+        printf("\t                �              [5] Dairy                                    �\n");
+        printf("\t                �              [6] Frozen Foods                             �\n");
+        printf("\t                �              [7] Body Care & Beauty Care                  �\n");
+        printf("\t                �              [8] Detergents and Soaps                     �\n");
+        printf("\t                �                                                           �\n");
+        printf("\t                �              [0] Go back                                  �\n");
+        printf("\t                �                                                           �\n");
+        printf("\n\t              *    ��������������������������������������������������������  *\n");
 
-        printf("Welcome to our store\n");
-        printf("What do you what to browse?\n\n");
+        printf("\n\tNOTE: THE PROMO CODES WILL APPLY ONLY TO THE CUSTOMER WHO SPEND ABOVE 200 PESOS\n");
 
-        printf("[1] Beverages\n");
-        printf("[2] Snacks\n");
-        printf("[3] Canned Goods\n");
-        printf("[4] Condiments\n");
-        printf("[5] Dairy\n");
-        printf("[6] Frozen Foods\n");
-        printf("[7] Body Care & Beauty Care\n");
-        printf("[8] Detergents and Soaps\n\n");
 
-        printf("[0] Go back\n");
-
-        printf("\nEnter Here: ");
+        printf("\n\tEnter Here: ");
         scanf(" %c", &item_category);
 
         switch (item_category)
         {
             case '0':
-                user_customer();
                 reset_cart(cart, &total_items, &total_price);
+                user_customer();
                 break;
             case '1':
                 browse_beverages(&queue_number);
@@ -498,7 +560,7 @@ void guest_customer_item_category()
 
 void guest_process()
 {
-    //system("cls");
+    system("cls");
     char choice;
 
     guest_menu_customer_process(cart, &total_items, &total_price);
@@ -506,7 +568,7 @@ void guest_process()
 // Display cart before finalization
     display_cart(cart, total_items, total_price);
 
-    printf("\nPress [E] to checkout or press any key to shop again.: ");
+    printf("\n\tPress [E] to checkout or press any key to shop again.: ");
     scanf(" %c", &choice);
 
     if (choice == 'E' || choice == 'e')
@@ -532,7 +594,7 @@ void ask_to_go_back() {
     char ch;
 
     while (1) {
-        printf("Do you want to go back yes[Y] or no[N]: ");
+        printf("\tDo you want to go back yes[Y] or no[N]: ");
         ch = getch(); // Reads a single character without echoing it
         printf("\n");
 
@@ -553,17 +615,17 @@ void press_any_key()
 {
     char ch;
 
-    printf("Press any key to continue: ");
+    printf("\tPress any key to continue: ");
     ch = getch(); // Reads a single character without echoing it
     printf("\nYou pressed: %c\n", ch);
-    //system("cls");
+    system("cls");
 }
 
 /*****END*********************END***********END***********END************END************END************END************END************END************END************END************END*****/
 
 void browse_beverages(int *queue_number)
 {
-    //system("cls");
+    system("cls");
     printf("Beverages:\n");
     product_display(beverages, 18);
     process_customer_order(beverages, 18, cart, &total_items, &total_price, (*queue_number)++);
@@ -571,7 +633,7 @@ void browse_beverages(int *queue_number)
 
 void browse_snacks(int *queue_number)
 {
-    //system("cls");
+    system("cls");
     printf("Snacks:\n");
     product_display(snacks, 24);
     process_customer_order(snacks, 24, cart, &total_items, &total_price, (*queue_number)++);
@@ -579,25 +641,34 @@ void browse_snacks(int *queue_number)
 
 void browse_canned_goods(int *queue_number)
 {
-    //system("cls");
+    system("cls");
     char choice;
-    printf("Canned Goods:\n");
-    printf("[1] Canned Fish\n");
-    printf("[2] Canned Meat\n");
-    printf("[0] Go back\n");
-    printf("\nEnter Here: ");
+    printf("\n");
+    printf("\t���������������������������������������������������������\n");
+    printf("\t�              Select kind of Canned Goods:             �\n");
+    printf("\t�                                                       �\n");
+    printf("\t�              [1] Canned Fish                          �\n");
+    printf("\t�              [2] Canned Meat                          �\n");
+    printf("\t�                                                       �\n");
+    printf("\t�              [0] Go Back                              �\n");
+    printf("\t�                                                       �\n");
+    printf("\t�                                                       �\n");
+    printf("\t���������������������������������������������������������\n");
+
+    printf("\tEnter Here: ");
     scanf(" %c", &choice);
+
 
     switch (choice) {
         case '0':
             return;
         case '1':
-            //system("cls");
+            system("cls");
             product_display(canned_fish, 11);
             process_customer_order(canned_fish, 11, cart, &total_items, &total_price, (*queue_number)++);
             break;
         case '2':
-            //system("cls");
+            system("cls");
             product_display(canned_meat, 14);
             process_customer_order(canned_meat, 14, cart, &total_items, &total_price, (*queue_number)++);
             break;
@@ -609,7 +680,7 @@ void browse_canned_goods(int *queue_number)
 
 void browse_condiments(int *queue_number)
 {
-    //system("cls");
+    system("cls");
     printf("Condiments:\n");
     product_display(condiments, 12);
     process_customer_order(condiments, 12, cart, &total_items, &total_price, (*queue_number)++);
@@ -617,7 +688,7 @@ void browse_condiments(int *queue_number)
 
 void browse_dairy(int *queue_number)
 {
-    //system("cls");
+    system("cls");
     printf("Dairy:\n");
     product_display(dairy, 12);
     process_customer_order(dairy, 12, cart, &total_items, &total_price, (*queue_number)++);
@@ -625,7 +696,7 @@ void browse_dairy(int *queue_number)
 
 void browse_frozen_foods(int *queue_number)
 {
-    //system("cls");
+    system("cls");
     printf("Frozen Foods:\n");
     product_display(frozen_foods, 10);
     process_customer_order(frozen_foods, 10, cart, &total_items, &total_price, (*queue_number)++);
@@ -635,20 +706,32 @@ void browse_self_care_products(int *queue_number)
 {
     char choice;
 
-    //system("cls");
-    printf("Select what body care or beauty care product you want to browse.\n[1] Body Care\n[2] Beauty Care\n[0] Go back\n\nEnter here:");
+    system("cls");
+    printf("\n");
+    printf("\t���������������������������������������������������������\n");
+    printf("\t�      Select What Care Product you want to browse:     �\n");
+    printf("\t�                                                       �\n");
+    printf("\t�             [1] Body Care                             �\n");
+    printf("\t�             [2] Beauty Care                           �\n");
+    printf("\t�                                                       �\n");
+    printf("\t�             [0] Go Back                               �\n");
+    printf("\t�                                                       �\n");
+    printf("\t���������������������������������������������������������\n");
+
+    printf("\tEnter Here: ");
     scanf(" %c", &choice);
+
 
     switch (choice) {
         case '0':
             return;
         case '1':
-            //system("cls");
+            system("cls");
             product_display(body_care, 12);
             process_customer_order(body_care, 12, cart, &total_items, &total_price, (*queue_number)++);
             break;
         case '2':
-            //system("cls");
+            system("cls");
             product_display(beauty_care, 10);
             process_customer_order(beauty_care, 10, cart, &total_items, &total_price, (*queue_number)++);
             break;
@@ -662,25 +745,39 @@ void browse_detergent_soaps(int *queue_number)
 {
     char choice;
 
-    //system("cls");
-    printf("Select what body care or beauty care product you want to browse.\n[1] Body Care\n[2] Beauty Care\n[0] Go back\n\nEnter here:");
+    system("cls");
+    printf("\n");
+    printf("\t���������������������������������������������������������\n");
+    printf("\t�             Pick The Type of Detergent:               �\n");
+    printf("\t�                                                       �\n");
+    printf("\t�             [1] Powder Detergent                      �\n");
+    printf("\t�             [2] Bar Soap                              �\n");
+    printf("\t�             [3] Liquid Soap                           �\n");
+    printf("\t�                                                       �\n");
+    printf("\t�             [0] Go Back                               �\n");
+    printf("\t�                                                       �\n");
+    printf("\t�                                                       �\n");
+    printf("\t���������������������������������������������������������\n");
+
+    printf("\tEnter Here: ");
     scanf(" %c", &choice);
+
 
     switch (choice) {
         case '0':
             return;
         case '1':
-            //system("cls");
+            system("cls");
             product_display(detergents, 15);
             process_customer_order(detergents, 15, cart, &total_items, &total_price, (*queue_number)++);
             break;
         case '2':
-            //system("cls");
+            system("cls");
             product_display(bar_soap, 11);
             process_customer_order(bar_soap, 11, cart, &total_items, &total_price, (*queue_number)++);
             break;
         case '3':
-            //system("cls");
+            system("cls");
             product_display(liquid_soaps, 8);
             process_customer_order(liquid_soaps, 8, cart, &total_items, &total_price, (*queue_number)++);
             break;
@@ -695,22 +792,37 @@ void browse_detergent_soaps(int *queue_number)
 
 void view_cart(struct Product cart[], int total_items, float total_price)
 {
-    //system("cls");
+    system("cls");
 
     if (total_items == 0) {
-        printf("Your cart is empty.\n");
+        printf("\n");
+        printf("\t���������������������������������������������������������\n");
+        printf("\t�                                                       �\n");
+        printf("\t�                  Your Cart Is Empty.                  �\n");
+        printf("\t�                                                       �\n");
+        printf("\t���������������������������������������������������������\n");
+
+
         return;
     }
+    printf("\n");
+    printf("\t���������������������������������������������������������������������������������������\n");
+    printf("\t�                                                                                     �\n");
+    printf("\t�\tCurrent Cart:                                                                 �\n");
+    printf("\t�\tCODE:\t\tPRODUCT NAME:\t\t\tQUANTITY:\tPRICE:        �\n");
 
-    printf("\nCurrent Cart:\n");
-    printf("CODE:\t\tPRODUCT NAME:\t\t\tQUANTITY:\tPRICE:\n");
 
     // Iterate through the items in the cart
     for (int i = 0; i < total_items; i++) {
-        printf("%-8s\t%-24s\tx%d\t\t%.2f\n", cart[i].code, cart[i].name, cart[i].quantity, cart[i].price * cart[i].quantity);
-    }
+        printf("\t�\t%-8s\t%-24s\tx%d\t\t%.2f        �\n", cart[i].code, cart[i].name, cart[i].quantity, cart[i].price * cart[i].quantity);
 
-    printf("\nTotal Price: %.2f\n", total_price);
+    }
+    printf("\t�                                                                                    �\n");
+    printf("\t�\tTotal Price: %.2f                                                            �\n", total_price);
+    printf("\t�                                                                                     �");
+
+
+    printf("\n\t���������������������������������������������������������������������������������������\n");
 
 
 }
@@ -741,7 +853,7 @@ void process_customer_order(struct Product products[], int num_products, struct 
 
     do{
         // Prompt user to enter product code
-        printf("\nEnter product code: ");
+        printf("\n\tEnter product code: ");
         scanf("%s", &product_code);
 
         // Find the index of the product with the entered code
@@ -751,9 +863,9 @@ void process_customer_order(struct Product products[], int num_products, struct 
             printf("Invalid input.\n");
             char ch;
 
-            printf("Press any key to continue: ");
+            printf("\tPress any key to continue: ");
             ch = getch(); // Reads a single character without echoing it
-            printf("\nYou pressed: %c\n", ch);
+            printf("\n\tYou pressed: %c\n", ch);
 
         }
     } while (check == -1);
@@ -767,7 +879,7 @@ void process_customer_order(struct Product products[], int num_products, struct 
     do {
         valid_input = 1; // Assume input is valid
 
-        printf("Enter quantity: ");
+        printf("\tEnter quantity: ");
         if (scanf("%d", &quantity) != 1) {
             // If scanf returns anything other than 1, it means input was not a valid integer
             printf("Invalid input. Please enter a valid quantity.\n");
@@ -778,20 +890,20 @@ void process_customer_order(struct Product products[], int num_products, struct 
 
     } while (!valid_input);
 
-    printf("Price: %5.2f\n", selected_product.price * quantity);
+    printf("\tPrice: %5.2f\n", selected_product.price * quantity);
 
-    printf("Add to cart (A) or cancel (C)? ");
+    printf("\tAdd to cart (A) or cancel (C)? ");
     scanf(" %c", &choice);
 
     // If user chooses to add to cart, call add_to_cart function
     if (choice == 'A' || choice == 'a') {
         add_to_cart(selected_product, quantity, cart, total_items, total_price);
-        printf("Item added to cart.\n");
+        printf("\tItem added to cart.\n");
     }
         // If user chooses to cancel, display message and break out of loop
     else if (choice == 'C' || choice == 'c')
     {
-        printf("Item not added to cart.\n");
+        printf("\tItem not added to cart.\n");
     }
 
 }
@@ -810,7 +922,7 @@ void reset_cart(struct Product cart[], int *total_items, float *total_price)
     *total_items = 0;
     *total_price = 0.0;
 
-    printf("Cart has been reset.\n");
+    printf("\tCart has been reset.\n");
 
     return;
 }
@@ -822,21 +934,20 @@ void reset_cart(struct Product cart[], int *total_items, float *total_price)
 void guest_menu_customer_process (struct Product cart[], int *total_items, float *total_price)
 {
     char choice;
-    char confirm_choice;
 
     do {
         // Display cart after processing each order
         view_cart(cart, *total_items, *total_price);
 
         // Prompt user to add more items or proceed to checkout
-        printf("\nAdd more items (A)\n");
-        printf("Remove Items (R)\n");
-        printf("Deduct Quantity(D)\n");
-        printf("Clear Cart(C)\n");
-        printf("Proceed to checkout (P)\n");
-        printf("Go Back (B)\n");
+        printf("\tAdd more items (A)\n");
+        printf("\tRemove Items (R)\n");
+        printf("\tDeduct Quantity(D)\n");
+        printf("\tClear Cart(C)\n");
+        printf("\tProceed to checkout (P)\n");
+        printf("\tGo Back (B)\n");
 
-        printf("\nEnter choice: ");
+        printf("\tEnter choice: ");
         scanf(" %c", &choice);
 
         switch (choice)
@@ -857,26 +968,8 @@ void guest_menu_customer_process (struct Product cart[], int *total_items, float
                 break;
             case 'C':
             case 'c':
-                do{
-                    printf("\nAre you sure you want to clear cart? (Y/N): ");
-                    scanf(" %c", &confirm_choice);
-
-                    switch (confirm_choice) {
-                        case 'y' :
-                        case 'Y' :
-                            break;
-                        case 'n' :
-                        case 'N' :
-                            guest_menu_customer_process(cart, total_items, total_price);
-                            break;
-                        default:
-                            printf("\nInvalid input. Try again...\n");
-                            press_any_key();
-                    }
-
-                } while (confirm_choice != 'Y' && confirm_choice != 'y');
                 reset_cart(cart, total_items, total_price);
-
+                view_cart(cart, *total_items, *total_price);
                 break;
             case 'B':
             case 'b':
@@ -885,22 +978,18 @@ void guest_menu_customer_process (struct Product cart[], int *total_items, float
             case 'P':
             case 'p':
                 // Confirmation before checkout
-                printf("\nAre you sure you want to proceed to checkout? (Y/N): ");
+                char confirm_choice;
+                printf("\n\tAre you sure you want to proceed to checkout? (Y/N): ");
                 scanf(" %c", &confirm_choice);
 
                 if (confirm_choice == 'Y' || confirm_choice == 'y') {
                     // Proceed to checkout logic
                     // (replace this with your actual checkout process)
-                    printf("\nProcessing checkout...\n");
+                    printf("\n\tProcessing checkout...\n");
                 } else {
-                    printf("\nCheckout cancelled.\n");
-                    press_any_key();
-                    guest_menu_customer_process(cart, total_items, total_price);
+                    printf("\n\tCheckout cancelled.\n");
                 }
                 break;
-            default:
-                printf("\nInvalid input. Try again...\n");
-                press_any_key();
         }
 
     } while (choice != 'p' && choice != 'P');
@@ -926,7 +1015,7 @@ int find_product_code(char product_code[], struct Product products[], int num_pr
 // Function to display product details, reusable tong part na to
 void display_product_details(struct Product products)
 {
-    printf("Name: %-24s   Price: %5.2f\n", products.name, products.price);
+    printf("\tName: %-24s   Price: %5.2f\n", products.name, products.price);
 }
 
 /*****END*********************END***********END***********END************END************END************END************END************END************END************END************END*****/
@@ -965,18 +1054,19 @@ void display_cart(struct Product cart[], int total_items, float total_price)
 {
     if (total_items > 0)
     {
-        //system("cls");
-        printf("\nCart:\n");
-        printf("CODE:\t\tPRODUCT NAME:\t\t\tQUANTITY:\tPRICE:\n");
+        system("cls");
+        printf("\n\tCart:\n");
+        printf("\tCODE:\t\tPRODUCT NAME:\t\t\tQUANTITY:\tPRICE:\n");
 
         // Iterate through the cart items
         for (int i = 0; i < total_items; i++) {
-            printf("%-8s\t%-24s\tx%d\t\t%5.2f\n", cart[i].code, cart[i].name, cart[i].quantity, cart[i].price * cart[i].quantity);
+            printf("\t%-8s\t%-24s\tx%d\t\t%5.2f\n", cart[i].code, cart[i].name, cart[i].quantity, cart[i].price * cart[i].quantity);
         }
 
-        printf("\nTotal Price: %8.2f\n", total_price);
+        printf("\n\tTotal Price: %8.2f\n", total_price);
 
-        printf("\nNOTE: THE PROMO CODES WILL APPLY ONLY TO THE CUSTOMER WHO SPEND ABOVE 200 PESOS\n");
+        printf("\n\tNOTE: THE PROMO CODES WILL APPLY ONLY TO THE CUSTOMER WHO SPEND ABOVE 200 PESOS\n");
+        printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
 
     }
 }
@@ -988,7 +1078,7 @@ void ask_remove(struct Product cart[], int *total_items, float *total_price)
 {
     char choice[20];
 
-    printf("Enter the Product Code you want to remove from the cart: ");
+    printf("\tEnter the Product Code you want to remove from the cart: ");
     scanf("%s", choice);
 
     remove_from_cart(cart, total_items, total_price, choice);
@@ -1002,7 +1092,7 @@ void remove_from_cart(struct Product cart[], int *total_items, float *total_pric
     char confirmation;                // Variable para sa kumpirmasyon ng user
 
     // Hingin ang kumpirmasyon ng user para tanggalin ang item
-    printf("Are you sure you want to remove this item? (Y/N): ");
+    printf("\tAre you sure you want to remove this item? (Y/N): ");
     scanf(" %c", &confirmation);
 
     // Suriin kung ang user ay nagkumpirma na gusto niyang tanggalin
@@ -1030,13 +1120,13 @@ void remove_from_cart(struct Product cart[], int *total_items, float *total_pric
 
         // Magbigay ng feedback sa user tungkol sa proseso ng pagtanggal
         if (removed_items > 0) {
-            printf("%d item(s) with product code %s removed from cart.\n", removed_items, code);
+            printf("\t%d item(s) with product code %s removed from cart.\n", removed_items, code);
         } else {
-            printf("Product with code %s not found in the cart.\n", code);
+            printf("\tProduct with code %s not found in the cart.\n", code);
         }
     } else {
         // Kung kinansela ng user ang pagtanggal, magpakita ng mensahe ng pagkansela
-        printf("Item removal canceled.\n");
+        printf("\tItem removal canceled.\n");
     }
 }
 
@@ -1049,7 +1139,7 @@ void ask_deduct(struct Product cart[], int *total_items, float *total_price)
 {
     char choice[20];
 
-    printf("Enter the Product Code you want to remove from the cart: ");
+    printf("\tEnter the Product Code you want to remove from the cart: ");
     scanf("%s", choice);
 
     deduct_from_cart(cart, total_items, total_price, choice);
@@ -1069,19 +1159,19 @@ void deduct_from_cart(struct Product cart[], int *total_items, float *total_pric
             found = 1;
 
             // Confirm deduction with the user
-            printf("Enter how many items you want to deduct for product with code %s: ", code);
+            printf("\tEnter how many items you want to deduct for product with code %s: ", code);
             if (scanf("%d", &deduct_quantity) != 1 || deduct_quantity <= 0) {
-                printf("Invalid input. Please enter a valid number greater than zero.\n");
+                printf("\tInvalid input. Please enter a valid number greater than zero.\n");
                 return; // Exit function if invalid input
             }
 
-            printf("Are you sure you want to deduct %d item(s) of product with code %s from the cart? (Y/N): ", deduct_quantity, code);
+            printf("\tAre you sure you want to deduct %d item(s) of product with code %s from the cart? (Y/N): ", deduct_quantity, code);
             scanf(" %c", &confirmation);
 
             if (confirmation == 'Y' || confirmation == 'y') {
                 // Check if deduct_quantity exceeds available quantity
                 if (deduct_quantity > cart[i].quantity) {
-                    printf("Cannot deduct more than what's in the cart. Deduction canceled.\n");
+                    printf("\tCannot deduct more than what's in the cart. Deduction canceled.\n");
                 } else {
                     // Deduct the specified quantity from the total items of the product in the cart
                     cart[i].quantity -= deduct_quantity;
@@ -1089,12 +1179,12 @@ void deduct_from_cart(struct Product cart[], int *total_items, float *total_pric
                     // Update total items and total price only if deduction happened
                     *total_price -= (cart[i].price * deduct_quantity);
 
-                    printf("Deducted %d item(s) of product with code %s from the cart.\n", deduct_quantity, code);
+                    printf("\tDeducted %d item(s) of product with code %s from the cart.\n", deduct_quantity, code);
                 }
             } else if (confirmation == 'N' || confirmation == 'n') {
-                printf("Deduction canceled.\n");
+                printf("\tDeduction canceled.\n");
             } else {
-                printf("Invalid input. Please enter Y or N.\n");
+                printf("\tInvalid input. Please enter Y or N.\n");
             }
 
             return; // Exit function after processing
@@ -1102,7 +1192,7 @@ void deduct_from_cart(struct Product cart[], int *total_items, float *total_pric
     }
 
     if (!found) {
-        printf("Product with code %s not found in the cart.\n", code);
+        printf("\tProduct with code %s not found in the cart.\n", code);
     }
 }
 
@@ -1167,26 +1257,27 @@ void save_cart_to_csv(struct Product cart[], int total_items, float total_price)
     }
 
     // Write header
-    fprintf(file, "Code,Name,Quantity,Price\n");
+    fprintf(file, "\tCode,Name,Quantity,Price\n");
 
     // Write cart items
     for (int i = 0; i < total_items; i++) {
-        fprintf(file, "%s,%s,%d,%.2f\n", cart[i].code, cart[i].name, cart[i].quantity, cart[i].price);
+        fprintf(file, "\t%s,%s,%d,%.2f\n", cart[i].code, cart[i].name, cart[i].quantity, cart[i].price);
     }
-
+    printf("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n");
 
     // Close file
     fclose(file);
 
-    printf("\nFile successfully saved\n");
+    printf("\n\tFile successfully saved\n");
 
     // Print the current queue number
-    printf("\n||==============================================||\n");
-    printf("||\t\t\t\t\t\t||\n");
-    printf("||\tYour queue number is: %d\t\t\t||\n", queue_number);
-    printf("||\t\t\t\t\t\t||\n");
-    printf("||==============================================||\n\n");
-    printf("Thank you for ordering! Please remember your queue number and proceed to the cashier.\n\n");
+    printf("\t����������������������������������������������������������������������������������������\n");
+    printf("\t�                                                                                      �\n");
+    printf("\t�                            Your queue number is: %d                                   �\n", queue_number);
+    printf("\t�                                                                                      �\n");
+    printf("\t�                                                                                      �\n");
+    printf("\t�Thank you for ordering! Please remember your queue number and proceed to the cashier. �\n");
+    printf("\t����������������������������������������������������������������������������������������\n\n");
 
 
     // Increment the queue number and save it back to the file
@@ -1202,7 +1293,7 @@ void save_customer_to_file(struct customer customer)
 {
     FILE *file = fopen(CUSTOMER_FILE, "a");  // Open file in append mode
     if (file == NULL) {
-        printf("Error opening file for writing.\n");
+        printf("\tError opening file for writing.\n");
         return;
     }
     fprintf(file, "%s %s %s %s %.2f\n", customer.username, customer.password, customer.phone_number, customer.payment_method, customer.balance);
@@ -1214,7 +1305,7 @@ void save_customer_to_file(struct customer customer)
 void load_customers_from_file() {
     FILE *file = fopen(CUSTOMER_FILE, "r");  // Open file in read mode
     if (file == NULL) {
-        printf("Error opening file for reading.\n");
+        printf("\tError opening file for reading.\n");
         return;
     }
 
@@ -1232,7 +1323,7 @@ void save_all_customers_to_file()
 {
     FILE *file = fopen(CUSTOMER_FILE, "w");  // Open file in write mode to overwrite
     if (file == NULL) {
-        printf("Error opening file for writing.\n");
+        printf("\tError opening file for writing.\n");
         return;
     }
 
@@ -1249,7 +1340,7 @@ void save_all_customers_to_file()
 void customer_register()
 {
     if (customer_count >= MAX_CUSTOMERS) {
-        printf("\nCustomer limit reached. Cannot register new customers.\n");
+        printf("\n\tCustomer limit reached. Cannot register new customers.\n");
         return;
     }
 
@@ -1257,38 +1348,68 @@ void customer_register()
     char confirm_password[50];
     float initial_funds;
 
-    printf("\nEnter Username: ");
+    printf("\n\tEnter Username: ");
     scanf("%s", new_customer.username);
 
     // Check if the username already exists
     for (int i = 0; i < customer_count; i++) {
-        if (strcmp(customers[i].username, new_customer.username) == 0)
-        {
-            printf("\nUsername already exists. Please choose a different username.\n");
+        if (strcmp(customers[i].username, new_customer.username) == 0) {
+            printf("\n\tUsername already exists. Please choose a different username.\n");
             return;
         }
     }
 
-    printf("Enter Password: ");
-    scanf("%s", new_customer.password);
+    // Hide password input for new_customer.password
+    printf("\tEnter Password: ");
+    int i = 0;
+    char ch;
+    while ((ch = _getch()) != '\r' && i < 49) { // Read characters until Enter is pressed
+        if (ch == '\b') { // Handle backspace
+            if (i > 0) {
+                printf("\b \b"); // Erase previous character
+                i--;
+            }
+        } else {
+            new_customer.password[i++] = ch;
+            printf("*"); // Print asterisk for each character
+        }
+    }
+    new_customer.password[i] = '\0'; // Null-terminate the password
 
-    printf("Confirm Password: ");
-    scanf("%s", confirm_password);
+    printf("\n");
+
+    // Hide password input for confirm_password
+    printf("\tConfirm Password: ");
+    i = 0;
+    while ((ch = _getch()) != '\r' && i < 49) { // Read characters until Enter is pressed
+        if (ch == '\b') { // Handle backspace
+            if (i > 0) {
+                printf("\b \b"); // Erase previous character
+                i--;
+            }
+        } else {
+            confirm_password[i++] = ch;
+            printf("*"); // Print asterisk for each character
+        }
+    }
+    confirm_password[i] = '\0'; // Null-terminate the password
+
+    printf("\n");
 
     // Check if the passwords match
     if (strcmp(new_customer.password, confirm_password) != 0) {
-        printf("\nPasswords do not match. Please try again.\n");
+        printf("\n\tPasswords do not match. Please try again.\n");
         return;
     }
 
     // Ask for phone number
-    printf("Enter Phone Number: ");
+    printf("\tEnter Phone Number: ");
     scanf("%s", new_customer.phone_number);
 
     // Ask for payment method
     char payment_choice;
 
-    printf("Is the phone number for GCash (G) or PayMaya (P)? ");
+    printf("\tIs the phone number for GCash (G) or PayMaya (P)? ");
     scanf(" %c", &payment_choice);
 
     if (payment_choice == 'G' || payment_choice == 'g') {
@@ -1296,13 +1417,13 @@ void customer_register()
     } else if (payment_choice == 'P' || payment_choice == 'p') {
         strcpy(new_customer.payment_method, "PayMaya");
     } else {
-        printf("\nInvalid choice. Please try again.\n");
+        printf("\n\tInvalid choice. Please try again.\n");
         press_any_key();
         return;
     }
 
     // Prompt for initial funds
-    printf("Enter initial amount to add to your account: ");
+    printf("\tEnter initial amount to add to your account: ");
     scanf("%f", &initial_funds);
 
     // Initialize balance with the entered initial funds
@@ -1314,9 +1435,10 @@ void customer_register()
     // Save the new customer to the file
     save_customer_to_file(new_customer);
 
-    printf("\nRegistration successful. You can now log in.\n");
+    printf("\n\tRegistration successful. You can now log in.\n");
 
     registered_user_customer_item_category(new_customer.username, &new_customer.balance, new_customer.payment_method);
+    customer_login();
 }
 
 
@@ -1330,7 +1452,7 @@ void add_funds(char* username)
     for (int i = 0; i < customer_count; i++) {
         if (strcmp(customers[i].username, username) == 0)
         {
-            printf("Enter amount to add: ");
+            printf("\tEnter amount to add: ");
             scanf("%f", &amount);
 
             // Add the amount to the customer's balance
@@ -1339,53 +1461,78 @@ void add_funds(char* username)
             // Save the updated customers to the file
             save_all_customers_to_file();
 
-            printf("\nFunds added successfully. New balance: %.2f\n", customers[i].balance);
+            printf("\n\tFunds added successfully. New balance: %.2f\n", customers[i].balance);
             return;
         }
     }
 
-    printf("\nUsername not found. Please try again.\n");
+    printf("\n\tUsername not found. Please try again.\n");
 }
 
 
 /*****END*********************END***********END***********END************END************END************END************END************END************END************END************END*****/
-void increment_attempts(int *attempt_count) {
+void increment_attempts(int *attempt_count, char *username) {
     (*attempt_count)++;
-    printf("\nInvalid username or password. Attempt %d\n", *attempt_count);
+    printf("\n\tInvalid username or password. Attempt %d\n", *attempt_count);
     if (*attempt_count == 5) {
         char choice;
-        printf("You have reached the maximum number of attempts.\n");
-        printf("Do you want to reset attempts (R) or change password (C)? (R/C): ");
-        choice = getch(); // Use getch() to capture user input without displaying it
-        if (choice == 'R' || choice == 'r') {
+        printf("\tDue to multiple wrong attempts. Your account has been revoked.\n");
+        printf("\tType in [U] = unlock account || [R] = reset password: ");
+        scanf(" %c", &choice); // Use scanf to capture user input
+
+        if (choice == 'U' || choice == 'u') {
             reset_attempts(attempt_count);
-        } else if (choice == 'C' || choice == 'c') {
-            printf("Please proceed to manager to reset your password\n");
-            printf("Press any key to return to the main menu...\n");
-            getch(); // Wait for user input before returning to main menu
-            return;
+        } else if (choice == 'R' || choice == 'r') {
+            printf("\tReach out to our manager to change the password.\n");
+            press_any_key();
         } else {
-            printf("Invalid choice. Please enter R or C.\n");
-            increment_attempts(attempt_count); // Loop until a valid choice is made
+            printf("\tInvalid choice. Please enter R or U.\n");
+            increment_attempts(attempt_count, username); // Loop until a valid choice is made
         }
     }
 }
 
+
 void reset_attempts(int *attempt_count) {
     int manager_code;
-    printf("Manager verification required to reset attempts.\n");
-    do {
-        printf("Enter manager code: ");
-        scanf("%d", &manager_code);
-        if (manager_code == 123) {
+    char code_str[50];
+    printf("\tManager verification required to reset attempts.\n");
+
+    while (1) {
+        printf("\tEnter manager code: ");
+
+        // Hide manager code input
+        int i = 0;
+        char ch;
+        while ((ch = _getch()) != '\r' && i < 49) { // Read characters until Enter is pressed
+            if (ch == '\b') { // Handle backspace
+                if (i > 0) {
+                    printf("\b \b"); // Erase previous character
+                    i--;
+                }
+            } else {
+                code_str[i++] = ch;
+                printf("*"); // Print asterisk for each character
+            }
+        }
+        code_str[i] = '\0'; // Null-terminate the input
+
+        // Convert the string to an integer
+        manager_code = atoi(code_str);
+
+        if (manager_code == 1234) {
             *attempt_count = 0; // Reset attempts
-            printf("Attempts reset successfully.\n");
+            printf("\n\tAttempts reset successfully.\n");
             break; // Exit the loop if manager code is correct
         } else {
-            printf("Incorrect manager code. Please try again.\n");
+            printf("\n\tIncorrect manager code. Please try again.\n");
         }
-    } while (1); // Loop until correct manager code is entered
+    }
 }
+
+
+
+
 
 
 void customer_login() {
@@ -1397,17 +1544,39 @@ void customer_login() {
     load_customers_from_file();
 
     while (attempt_count < max_attempts) {
-        printf("\nEnter Username: ");
+        printf("===================================\n");
+        printf("|                                 |\n");
+        printf("|          Shopper Login          |\n");
+        printf("|                                 |\n");
+        printf("===================================\n");
+        printf("\n\tEnter Username: ");
         scanf("%s", username);
 
-        printf("Enter Password: ");
-        scanf("%s", password);
+        printf("\tEnter Password: ");
+
+        // Hide password input
+        int i = 0;
+        char ch;
+        while ((ch = _getch()) != '\r' && i < 49) { // Read characters until Enter is pressed
+            if (ch == '\b') { // Handle backspace
+                if (i > 0) {
+                    printf("\b \b"); // Erase previous character
+                    i--;
+                }
+            } else {
+                password[i++] = ch;
+                printf("*"); // Print asterisk for each character
+            }
+        }
+        password[i] = '\0'; // Null-terminate the password
+
+        printf("\n");
 
         // Check if the username and password match any customer record
         int login_successful = 0;
         for (int i = 0; i < customer_count; i++) {
             if (strcmp(customers[i].username, username) == 0 && strcmp(customers[i].password, password) == 0) {
-                printf("\nLogin successful.\n");
+                printf("\n\tLogin successful.\n");
                 registered_user_customer_item_category(customers[i].username, &customers[i].balance, customers[i].payment_method);
                 login_successful = 1;
                 break;
@@ -1417,7 +1586,7 @@ void customer_login() {
         if (login_successful) {
             break;
         } else {
-            increment_attempts(&attempt_count);
+            increment_attempts(&attempt_count, username);
             if (attempt_count >= max_attempts) {
                 break;
             }
@@ -1435,38 +1604,53 @@ void registered_user_customer_item_category(char* username, float *balance, cons
     int queue_number = 1; // Initialize queue_number to 1
 
     do {
-        //system("cls");
-        printf("\nWelcome to our store\n");
-        printf("\nWelcome back, %s!\n", username);
-        printf("Your balance: %.2f\n", *balance);
-        printf("What do you want to browse?\n\n");
+        system("cls");
+        printf("\n");
+        printf("\t===================================\n");
+        printf("\t|                                 |\n");
+        printf("\t|        Shopper Dashboard        |\n");
+        printf("\t|                                 |\n");
+        printf("\t===================================\n");
+        printf("\t���������������������������������������������������������\n");
+        printf("\t�                       MENU                            �\n");
+        printf("\t�                Welcome Back, %s!                    �\n", username);
+        printf("\t�                                                       �\n");
+        printf("\t�               Your balance: %.2f                   �\n", *balance);
+        printf("\t�                                                       �\n");
+        printf("\t�             What do you want to browse?               �\n");
+        printf("\t�                                                       �\n");
+        printf("\t�                                                       �\n");
+        printf("\t���������������������������������������������������������\n");
 
-        printf("[1] Beverages\n");
-        printf("[2] Snacks\n");
-        printf("[3] Canned Goods\n");
-        printf("[4] Condiments\n");
-        printf("[5] Dairy\n");
-        printf("[6] Frozen Foods\n");
-        printf("[7] Body Care & Beauty Care\n");
-        printf("[8] Detergents and Soaps\n");
-        printf("[9] Add Funds\n\n");
 
-        printf("[0] Go back\n");
 
-        printf("\nEnter Here: ");
+
+        printf("\t[1] Beverages\n");
+        printf("\t[2] Snacks\n");
+        printf("\t[3] Canned Goods\n");
+        printf("\t[4] Condiments\n");
+        printf("\t[5] Dairy\n");
+        printf("\t[6] Frozen Foods\n");
+        printf("\t[7] Body Care & Beauty Care\n");
+        printf("\t[8] Detergents and Soaps\n");
+        printf("\t[9] Add Funds\n\n");
+
+        printf("\t[0] Go back\n");
+
+        printf("\n\tEnter Here: ");
         scanf("%s", &item_category);
 
         switch (item_category)
         {
             case '0':
-                printf("\nDo you really want to go back? (Y/N): ");
+                printf("\n\tDo you really want to go back? (Y/N): ");
                 scanf(" %c", &choice);
 
                 // Check if the choice is 'Y' or 'y' for confirmation to go back
                 if (choice == 'Y' || choice == 'y') {
                     reset_cart(cart, &total_items, &total_price);
                     //save to csv
-                    return;
+                    user_customer();
                 }
                 break;
             case '1':
@@ -1520,10 +1704,10 @@ void registered_user_customer_item_category(char* username, float *balance, cons
                         return;
                     }
                 }
-                printf("\nYour updated balance: %.2f\n", *balance);
+                printf("\n\tYour updated balance: %.2f\n", *balance);
                 break;
             default:
-                printf("\nInvalid input. Try again...\n");
+                printf("\n\tInvalid input. Try again...\n");
                 press_any_key();
         }
 
@@ -1539,21 +1723,20 @@ void registered_user_customer_item_category(char* username, float *balance, cons
 void registered_user_menu_customer_process (struct Product cart[], int *total_items, float *total_price, char* username, float *balance,  const char *registered_payment_method)
 {
     char choice;
-    char confirm_choice;
 
     do {
         // Display cart after processing each order
         view_cart(cart, *total_items, *total_price);
 
         // Prompt user to add more items or proceed to checkout
-        printf("\nAdd more items (A)\n");
-        printf("Remove Items (R)\n");
-        printf("Deduct Quantity(D)\n");
-        printf("Clear Cart(C)\n");
-        printf("Proceed to checkout (P)\n");
-        printf("Go Back (B)\n");
+        printf("\n\tAdd more items (A)\n");
+        printf("\tRemove Items (R)\n");
+        printf("\tDeduct Quantity(D)\n");
+        printf("\tClear Cart(C)\n");
+        printf("\tProceed to checkout (P)\n");
+        printf("\tGo Back (B)\n");
 
-        printf("\nEnter choice: ");
+        printf("\n\tEnter choice: ");
         scanf(" %c", &choice);
 
         switch (choice)
@@ -1574,25 +1757,8 @@ void registered_user_menu_customer_process (struct Product cart[], int *total_it
                 break;
             case 'C':
             case 'c':
-                do{
-                    printf("\nAre you sure you want to clear cart? (Y/N): ");
-                    scanf(" %c", &confirm_choice);
-
-                    switch (confirm_choice) {
-                        case 'y' :
-                        case 'Y' :
-                            break;
-                        case 'n' :
-                        case 'N' :
-                            guest_menu_customer_process(cart, total_items, total_price);
-                            break;
-                        default:
-                            printf("\nInvalid input. Try again...\n");
-                            press_any_key();
-                    }
-
-                } while (confirm_choice != 'Y' && confirm_choice != 'y');
                 reset_cart(cart, total_items, total_price);
+                view_cart(cart, *total_items, *total_price);
                 break;
             case 'B':
             case 'b':
@@ -1600,7 +1766,9 @@ void registered_user_menu_customer_process (struct Product cart[], int *total_it
                 break;
             case 'P':
             case 'p':
-                printf("\nAre you sure you want to proceed to checkout? (Y/N): ");
+                // Confirmation prompt before checkout
+                char confirm_choice;
+                printf("\n\tAre you sure you want to proceed to checkout? (Y/N): ");
                 scanf(" %c", &confirm_choice);
 
                 if (confirm_choice == 'Y' || confirm_choice == 'y') {
@@ -1609,9 +1777,7 @@ void registered_user_menu_customer_process (struct Product cart[], int *total_it
                     printf("\nProceeding to Checkout...\n");
                     // ... your checkout code here ...
                 } else {
-                    printf("\nCheckout cancelled.\n");
-                    press_any_key();
-                    registered_user_menu_customer_process(cart, total_items, total_price, username, balance, registered_payment_method);
+                    printf("\n\tCheckout cancelled.\n");
                 }
                 break;
         }
@@ -1629,17 +1795,17 @@ void choose_payment_mode(const char *registered_payment_method)
     char contact_number[50];
 
     do {
-        printf("\nChoose your mode of payment:\n");
-        printf("1. Cash\n");
-        printf("2. Use E-wallet\n");
+        printf("\n\tChoose your mode of payment:\n");
+        printf("\t1. Cash\n");
+        printf("\t2. Use E-wallet\n");
 
-        printf("Enter choice: ");
+        printf("\tEnter choice: ");
         scanf("%d", &choice);
 
         switch (choice)
         {
             case 1:
-                printf("You have chosen Cash as your mode of payment.\n");
+                printf("\tYou have chosen Cash as your mode of payment.\n");
                 {
                     // Display the contents of the cart
                     display_cart(cart, total_items, total_price);
@@ -1650,9 +1816,9 @@ void choose_payment_mode(const char *registered_payment_method)
                 break; // Add break statement here
 
             case 2:
-                printf("You have chosen %s as your mode of payment.\n", registered_payment_method);
+                printf("\tYou have chosen %s as your mode of payment.\n", registered_payment_method);
                 do {
-                    printf("Enter Password: ");
+                    printf("\tEnter Password: ");
                     scanf("%s", password);
 
                     load_customers_from_file();
@@ -1660,23 +1826,23 @@ void choose_payment_mode(const char *registered_payment_method)
                     int login_success = 0; // Variable to track login success
                     for (int i = 0; i < customer_count; i++) {
                         if (strcmp(customers[i].password, password) == 0) {
-                            printf("\nLogin successful.\n");
+                            printf("\n\tLogin successful.\n");
 
                             // Prompt user to enter their contact number
                             while (1) {
-                                printf("Enter Contact Number: ");
+                                printf("\tEnter Contact Number: ");
                                 scanf("%s", contact_number);
 
                                 if (strcmp(customers[i].phone_number, contact_number) == 0) {
                                     // Contact number matches, proceed
-                                    printf("Contact number verified.\n");
+                                    printf("\tContact number verified.\n");
                                     generate_receipt(cart, total_items, total_price, customers[i].username, &(customers[i].balance), registered_payment_method);
                                     // Save the updated balance to file
                                     save_all_customers_to_file();
                                     login_success = 1;
                                     break;
                                 } else {
-                                    printf("Wrong contact number. Please try again.\n");
+                                    printf("\tWrong contact number. Please try again.\n");
                                 }
                             }
                             if (login_success) break; // Exit the outer loop if login is successful
@@ -1685,18 +1851,18 @@ void choose_payment_mode(const char *registered_payment_method)
 
                     if (login_success) break; // Exit the do-while loop if login is successful
 
-                    printf("Invalid password. Please try again or enter '0' to cancel payment.\n");
-                    printf("Enter choice: ");
+                    printf("\tInvalid password. Please try again or enter '0' to cancel payment.\n");
+                    printf("\tEnter choice: ");
                     scanf("%d", &choice);
                     if (choice == 0) {
-                        printf("Payment canceled.\n");
+                        printf("\tPayment canceled.\n");
                         return; // Exit the function if payment is canceled
                     }
                 } while (1); // Loop until a correct password and contact number are entered or payment is canceled
                 break; // Add break statement here
 
             default:
-                printf("Invalid choice. Please try again.\n");
+                printf("\tInvalid choice. Please try again.\n");
                 press_any_key();
         }
     } while (1); // Loop until a valid payment choice is made
@@ -1709,18 +1875,20 @@ void generate_receipt(struct Product cart[], int total_items, float total_price,
     char choice;
 
     if (total_items > 0) {
-        //system("cls");
+        system("cls");
 
-        printf("\n------------------***** Receipt *****----------------\n");
-        printf("\tWelcome To Fourgramming Store\n");
+        printf("\n");
+        printf("����������������������������������������������������������������\n");
+        printf("�-----------------***** Receipt *****--------------------------�\n");
+        printf("�               Fourgramming Store                             �\n");
         //dito lagyan nung realtime na code
         //nag crash kasi code ko pag nilalagay ko
-        printf("---------------------------------------------------------------\n");
-        printf("\tUsername: %s\n", username);
-        printf("---------------------------------------------------------------\n");
+        printf("�--------------------------------------------------------------�\n");
+        printf("�               Member Name: %s                          �\n", username);
+        printf("�--------------------------------------------------------------�\n");
         // Display items purchased
-        printf("\nCart:\n");
-        printf("CODE\t\tProduct Name\t   Quantity   Price\n");
+        printf("�Cart:                                                         �\n");
+        printf("�CODE\t\tProduct Name\t   Quantity   Price            �\n");
 
         // Initialize quantity count for the first product
         int quantity_count = 1;
@@ -1733,29 +1901,30 @@ void generate_receipt(struct Product cart[], int total_items, float total_price,
                 quantity_count++;
             } else {
                 // If no, print the current item with its quantity and reset quantity count
-                printf("%-8s \t%-24s \t  x%d  \t%5.2f\n", cart[i].code, cart[i].name, quantity_count, cart[i].price * quantity_count);
+                printf("�%-8s \t%-24s \t x%d  \t%5.2f  �\n", cart[i].code, cart[i].name, quantity_count, cart[i].price * quantity_count);
                 quantity_count = 1; // Reset quantity count for the next product
             }
         }
-        printf("---------------------------------------------------------------\n");
-        printf("\n\nTotal Price: %8.2f\n", total_price);
-        printf("---------------------------------------------------------------\n");
+        printf("�--------------------------------------------------------------�\n");
+        printf("�Total Price: %8.2f                                         �\n", total_price);
+        printf("�--------------------------------------------------------------�\n");
         // Display payment method
-        printf("\nPayment Method: %s\n", registered_payment_method);
+        printf("�Payment Method: %s                                         �\n", registered_payment_method);
 
-        printf("\nAmount Paid: P%.2f\n", total_price);
+        printf("�Amount Paid: P%.2f                                           �\n", total_price);
 
         // Update user's balance
         *balance -= total_price;
 
-        printf("---------------------------------------------------------------\n");
+        printf("�--------------------------------------------------------------�\n");
         // Display updated balance
-        printf("\nUpdated Balance: P%.2f\n", *balance);
-        printf("---------------------------------------------------------------\n");
+        printf("�Updated Balance: P%.2f                                   �\n", *balance);
+        printf("�--------------------------------------------------------------�\n");
+        printf("����������������������������������������������������������������\n");
         // Save receipt to CSV
         save_receipt_to_csv(cart, total_items, total_price, total_price);
 
-        printf("\nGo back and shop again (Any key) or Go back to the Menu (E) ");
+        printf("\n\tGo back and shop again (Any key) or Go back to the Menu (E) ");
         scanf(" %c", &choice);
 
         if (choice == 'E' || choice == 'e')
@@ -1764,7 +1933,7 @@ void generate_receipt(struct Product cart[], int total_items, float total_price,
 
             reset_cart(cart, &total_items, &total_price);
 
-            printf("Going back to Menu...\n");
+            printf("\tGoing back to Menu...\n");
             user_type_choice();
         }
         else {
@@ -1782,60 +1951,133 @@ void generate_receipt(struct Product cart[], int total_items, float total_price,
 
 void user_cashier()
 {
-    //system("cls");
+    system("cls");
     cashier_login();
 
 }
 
 /*****END*********************END***********END***********END************END************END************END************END************END************END************END************END*****/
 
-void cashier_login()
-{
+void cashier_login() {
     char username[50], password[50];
-    int valid = 0; //indicate if login is valid
-
-    while (!valid)
-    { // Loop until valid login
-        printf("\nCashier Login\n\n");
-        printf("Enter Credentials\n\n");
-        printf("Enter username: ");
+    int valid = 0; // Indicate if login is valid
+    int attempt_count = 0; // Count failed login attempts
+//generate_default_admin_credentials();
+    while (!valid) { // Loop until valid login
+        printf("===================================\n");
+        printf("|                                 |\n");
+        printf("|          Cashier Login          |\n");
+        printf("|                                 |\n");
+        printf("===================================\n");
+        printf("\tEnter Credentials\n\n");
+        printf("\tEnter username: ");
         scanf("%s", username);
 
-        printf("Enter password: ");
-        scanf("%s", password);
+        printf("\tEnter password: ");
+
+        // Hide password input
+        int i = 0;
+        char ch;
+        while ((ch = _getch()) != '\r' && i < 49) { // Read characters until Enter is pressed
+            if (ch == '\b') { // Handle backspace
+                if (i > 0) {
+                    printf("\b \b"); // Erase previous character
+                    i--;
+                }
+            } else {
+                password[i++] = ch;
+                printf("*"); // Print asterisk for each character
+            }
+        }
+        password[i] = '\0'; // Null-terminate the password
+
+        printf("\n");
 
         // Validate login
-        if (validate_cashier_login(username, password))
-        {
+        if (validate_cashier_login(username, password)) {
             //system("cls");
-            printf("Login successful!\n");
+            printf("\tLogin successful!\n");
             valid = 1; // Set flag to exit loop
             cashier_process_choice();
         } else {
-            printf("Invalid username or password. Please try again.\n");
-            press_any_key();
+            cashier_increment_attempts(&attempt_count, username);
+
+            if (attempt_count >= MAX_ATTEMPTS) {
+                break; // Exit the loop if maximum attempts are reached
+            }
         }
     }
 }
 
+
 /*****END*********************END***********END***********END************END************END************END************END************END************END************END************END*****/
 
-int validate_cashier_login(char username[], char password[])
+
+
+void generate_default_admin_credentials()
 {
-    // Define correct username and password
-    char correct_username[] = "admin";
-    char correct_password[] = "admin";
+    FILE *file = fopen("cashier_credentials.txt", "a+");
+    if (file == NULL) {
+        printf("Error: Could not create registrar credentials file.\n");
+        return; // Return if file creation fails
+    }
+
+    // Write default admin credentials to the file
+    fprintf(file, "admin admin"); // Username: admin, Password: admin
+    fclose(file);
+
+    //printf("Default admin credentials have been generated.\n");
+}
+
+
+
+int validate_cashier_login(char username[], char password[]) {
+    char correct_username[50];
+    char correct_password[50];
+    FILE *file = fopen("cashier_credentials.txt", "r+");
+
+    if (file == NULL) {
+        printf("\tError: Could not open credentials file.\n");
+        return 0; // Consider login invalid if file can't be read
+    }
+
+    fscanf(file, "%s %s", correct_username, correct_password);
+    fclose(file);
 
     // Compare entered credentials with correct ones
-    //kailangan magiging 0 dahil ibigsabihin nun tugma mga letra at pagkakasunod sunod ng character
-    //kaya 1 need ang bumalik dahil ayun ung nilagay ko sa return
-    //hanggat hindi nakaka 1point edi mali
     if (strcmp(username, correct_username) == 0 && strcmp(password, correct_password) == 0) {
         return 1; // Credentials are correct
     } else {
         return 0; // Credentials are incorrect
     }
+}
 
+
+void cashier_increment_attempts(int *attempt_count, char *username) {
+    (*attempt_count)++;
+    printf("\n\tInvalid username or password. Attempt %d/%d\n", *attempt_count, MAX_ATTEMPTS);
+    if (*attempt_count == MAX_ATTEMPTS) {
+        char choice;
+        printf("\tDue to multiple wrong attempts. Your account has been revoked.\n");
+        printf("\tType in [U] = unlock account || [R] = reset password: ");
+        scanf(" %c", &choice); // Read choice using scanf with a space before %c to consume any leftover whitespace
+
+        switch (choice) {
+            case 'U':
+            case 'u':
+                reset_attempts(attempt_count);
+                break;
+            case 'R':
+            case 'r':
+                printf("\tReach out to our manager to change the password.\n");
+                press_any_key();
+                break;
+            default:
+                printf("\tInvalid choice. Please enter U or R.\n");
+                cashier_increment_attempts(attempt_count, username); // Loop until a valid choice is made
+                break;
+        }
+    }
 }
 
 /*****END*********************END***********END***********END************END************END************END************END************END************END************END************END*****/
@@ -1851,13 +2093,13 @@ void cashier_process_choice()
         reset_counter(counter, &total_items, &total_price);
         selecting_queue_list_to_process();
 
-        printf("[1] Proceed to pay\n");
-        printf("[2] Modify Counter Items (under development)\n");
-        printf("[0] Exit\n");
+        printf("\t[1] Proceed to pay\n");
+        printf("\t[2] Modify Counter Items (under development)\n");
+        printf("\t[0] Exit\n");
 
-        printf("\n\nEnter Here: ");
+        printf("\n\n\tEnter Here: ");
         scanf(" %c", &choice);
-        // system("cls");
+        system("cls");
 
         switch (choice)
         {
@@ -1891,7 +2133,7 @@ void cashier_process_choice()
 
             case '0':
                 // Lumabas sa loop kung ang cashier ay pumili ng '0'.
-                printf("\nAre you sure you want to log out? (y/n): ");
+                printf("\n\tAre you sure you want to log out? (y/n): ");
                 scanf(" %c", &confirm);
 
                 if (confirm == 'y' || confirm == 'Y')
@@ -1900,14 +2142,14 @@ void cashier_process_choice()
                 }
                 else
                 {
-                    printf("\nLog out cancelled. Returning to menu...\n");
+                    printf("\n\tLog out cancelled. Returning to menu...\n");
                     press_any_key();
                 }
                 break;
 
             default:
                 // Kung ang input ay hindi wasto, ipakita ang error message.
-                printf("\nInvalid input. Try again...");
+                printf("\n\tInvalid input. Try again...");
                 press_any_key();
         }
     }
@@ -1925,11 +2167,18 @@ void selecting_queue_list_to_process()
     int choice; // User's choice
     char selected_file[256];
     char confirm;
+    char exit_confirmation;
 
     // Open the current directory
     directory = opendir(".");
 
     if (directory) {
+        system("cls");
+        printf("=======================================\n");
+        printf("|                                     |\n");
+        printf("|          Cashier Dashboard          |\n");
+        printf("|                                     |\n");
+        printf("=======================================\n\n");
         printf("\n\n\tCSV Files to Open:\n");
         // Iterate over files in the directory
         while ((dir = readdir(directory)) != NULL) {
@@ -1945,42 +2194,56 @@ void selecting_queue_list_to_process()
         closedir(directory);
 
         if (count > 0) {
-            printf("[0] Log Out\n");
-            printf("Enter the number of the file to open: ");
+            printf("\t[0] Log Out\n");
+            printf("\tEnter the number of the file to open: ");
             scanf("%d", &choice);
 
             if (choice > 0 && choice <= count) {
                 strcpy(selected_file, files[choice - 1]);
-                printf("You selected: %s\n", selected_file);
+                printf("\tYou selected: %s\n", selected_file);
                 // Read and process the selected CSV file
                 read_csv_to_counter(selected_file);
             } else if (choice == 0) {
-                printf("\nAre you sure you want to log out? (y/n): ");
+                printf("\n\tAre you sure you want to log out? (y/n): ");
                 scanf(" %c", &confirm);
                 if (confirm == 'y' || confirm == 'Y')
                 {
                     user_type_choice();
                 }
             } else {
-                printf("Invalid choice.\n");
+                printf("\tInvalid choice.\n");
                 press_any_key();
             }
         } else {
-            printf("No CSV files found.\n");
-            printf("No Queue Order to process.\n");
+            printf("\tNo CSV files found.\n");
+            printf("\tNo Queue Order to process.\n");
 
-            printf("Enter [0] to Log Out: ");
+            printf("\tEnter [0] to Log Out: ");
             scanf(" %c", &choice);
 
-            if (choice == '0') { user_type_choice();
+            if (choice == '0') {
+                printf("\tAre you sure you want to log out?\n");
+                printf("\t[Y] for Yes || [N] for No: ");
+                scanf(" %c", &exit_confirmation);
+
+                if(exit_confirmation == 'Y' || exit_confirmation == 'y'){
+                    user_type_choice();
+                }else if(exit_confirmation == 'N' || exit_confirmation == 'n') {
+                    selecting_queue_list_to_process();
+                }else{
+                    printf("\tInvalid input. Going back to Cashier Dashboard.\n");
+                    press_any_key();
+                    selecting_queue_list_to_process();
+                }
+                user_type_choice();
             }else {
-                printf("Invalid choice.\n");
+                printf("\tInvalid choice.\n");
                 press_any_key();
             }
         }
     } else {
         // Print an error message if the directory cannot be opened
-        printf("Error opening directory.\n");
+        printf("\tError opening directory.\n");
     }
 }
 
@@ -1991,7 +2254,7 @@ void read_csv_to_counter(const char *filename)
 {
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
-        printf("Error opening file %s.\n", filename);
+        printf("\tError opening file %s.\n", filename);
         return;
     }
 
@@ -2076,10 +2339,10 @@ void cashier_pay_option()
     // Loop until valid input is given
     while(1)
     {
-        printf("\n[1] Pay\n");
-        printf("[2] Discount\n");
-        printf("[0] Go back\n");
-        printf("\nEnter Here: ");
+        printf("\n\t[1] Pay\n");
+        printf("\t[2] Discount\n");
+        printf("\t[0] Go back\n");
+        printf("\n\tEnter Here: ");
         // Accept input from the cashier.
         scanf(" %c", &cashier_option);
         switch (cashier_option) {
@@ -2093,7 +2356,7 @@ void cashier_pay_option()
                 return;
             default:
                 // If the input is invalid, show an error message.
-                printf("\nInvalid input. Try again...\n");
+                printf("\n\tInvalid input. Try again...\n");
                 press_any_key();
         }
     }
@@ -2107,27 +2370,27 @@ void cashier_pay_process(struct Product counter[], int total_items, float *total
     int choice;
 
     display_counter(counter, total_items, *total_price);
-    printf("\nTotal Amount to Pay: %.2f\n", *total_price); // Display total price of items
+    printf("\n\tTotal Amount to Pay: %.2f\n", *total_price); // Display total price of items
 
     // Confirmation before proceeding to payment
-    printf("Do you want to proceed with the payment?\n");
-    printf("[1] Yes\n[2] Cancel\nEnter choice: ");
+    printf("\tDo you want to proceed with the payment?\n");
+    printf("\t[1] Yes\n[2] Cancel\nEnter choice: ");
     scanf("%d", &choice);
 
     switch (choice) {
         case 1:
-            printf("Enter rendered amount: ");
+            printf("\tEnter rendered amount: ");
             scanf("%f", &payment);
 
             if (payment >= *total_price) {
-                printf("Payment accepted.\n");
+                printf("\tPayment accepted.\n");
                 if (payment > *total_price) {
-                    printf("Change: %.2f\n", payment - *total_price);
+                    printf("\tChange: %.2f\n", payment - *total_price);
                 }
                 // Print receipt after successful payment
                 print_receipt(counter, total_items, *total_price, payment);
             } else {
-                printf("Insufficient payment. Please try again.\n");
+                printf("\tInsufficient payment. Please try again.\n");
                 cashier_pay_process(counter, total_items, total_price); // Recursively ask for payment until enough is provided.
             }
             break;
@@ -2137,7 +2400,7 @@ void cashier_pay_process(struct Product counter[], int total_items, float *total
             cashier_process_choice();
             break;
         default:
-            printf("Invalid choice. Please try again.\n");
+            printf("\tInvalid choice. Please try again.\n");
             press_any_key();
             cashier_pay_process(counter, total_items, total_price); // Recursively ask for choice until valid input is provided.
             break;
@@ -2151,7 +2414,7 @@ void print_receipt(struct Product counter[], int total_items, float total_price,
 {
     char choice;
     printf("\n\n----- RECEIPT -----\n");
-    printf("CODE\t\tProduct Name\t   Quantity   Price\n");
+    printf("CODE\t\tProduct Name\t Quantity  Price\n");
 
     for (int i = 0; i < total_items; i++) {
         printf("%-8s \t%-24s \t  x%d  \t%5.2f\n", counter[i].code, counter[i].name, counter[i].quantity, counter[i].price * counter[i].quantity);
@@ -2165,7 +2428,7 @@ void print_receipt(struct Product counter[], int total_items, float total_price,
         printf("Change: %.2f\n", payment - total_price);
     }
     printf("------------------------------------------\n");
-    printf("Do you want to go back to cashier menu (press any key) or Save & Exit (E): ");
+    printf("\tDo you want to go back to cashier menu (press any key) or Save & Exit (E): ");
     scanf("%s", &choice);
 
     if (choice == 'E' || choice == 'e')
@@ -2175,13 +2438,13 @@ void print_receipt(struct Product counter[], int total_items, float total_price,
 
         //reset the cart
         reset_counter(counter, &total_items, &total_price);
-        // cls
+
         cashier_process_choice();
         return;
     }
     else {
-        printf("Exiting...\n");
-        // cls
+        printf("\tExiting...\n");
+        system("cls");
         user_type_choice();
     }
 
@@ -2194,25 +2457,25 @@ void apply_discount(char promo_code[], float *total_price)
     if (strcmp(promo_code, "#PANALONATO") == 0) {
         *total_price -= 50.0;
         if (*total_price < 0) *total_price = 0;
-        printf("Promo code applied: 50 pesos off.\n");
+        printf("\tPromo code applied: 50 pesos off.\n");
 
     } else if (strcmp(promo_code, "#COUPON") == 0) {
         *total_price -= 85.0;
         if (*total_price < 0) *total_price = 0;
-        printf("Promo code applied: 85 pesos off.\n");
+        printf("\tPromo code applied: 85 pesos off.\n");
 
     } else if (strcmp(promo_code, "#FOURGRAMMING") == 0) {
         *total_price -= 90.0;
         if (*total_price < 0) *total_price = 0;
-        printf("Promo code applied: 90 pesos off.\n");
+        printf("\tPromo code applied: 90 pesos off.\n");
 
     } else if (strcmp(promo_code, "#MAAMSHEINNGANDA") == 0) {
         *total_price -= 100.0;
         if (*total_price < 0) *total_price = 0;
-        printf("Promo code applied: 100 pesos off.\n");
+        printf("\tPromo code applied: 100 pesos off.\n");
 
     } else {
-        printf("Invalid promo code.\n");
+        printf("\tInvalid promo code.\n");
     }
 }
 
@@ -2240,14 +2503,14 @@ void cashier_discount_process(float *total_price)
     int promo_code_valid = 0; // Flag to track if the promo code is valid
     bool coupon_used = false; // Flag to track if a coupon has been used
 
-    printf("\nAvailable Promo Codes (Each coupon can be used only once):\n");
-    printf("#PANALONATO - 50 pesos off\n");
-    printf("#COUPON - 85 pesos off\n");
-    printf("#FOURGRAMMING - 90 pesos off\n");
-    printf("#MAAMSHEINNGANDA - 100 pesos off\n");
+    printf("\n\tAvailable Promo Codes (Each coupon can be used only once):\n");
+    printf("\t#PANALONATO - 50 pesos off\n");
+    printf("\t#COUPON - 85 pesos off\n");
+    printf("\t#FOURGRAMMING - 90 pesos off\n");
+    printf("\t#MAAMSHEINNGANDA - 100 pesos off\n");
 
     while (!promo_code_valid) {
-        printf("\nEnter promo code: ");
+        printf("\n\tEnter promo code: ");
         scanf("%s", promo_code);
 
         // Check if the promo code is valid
@@ -2259,51 +2522,51 @@ void cashier_discount_process(float *total_price)
             coupon_used = true; // Mark the coupon as used
         } else {
             if (coupon_used) {
-                printf("Coupons can only be used once. Please try another promo code.\n");
+                printf("\tCoupons can only be used once. Please try another promo code.\n");
             } else {
-                printf("Invalid promo code. Please try again.\n");
+                printf("\tInvalid promo code. Please try again.\n");
             }
         }
     }
-    //system("cls");
-    printf("Checking if you spend above 200...\n");
+    system("cls");
+    printf("\tChecking if you spend above 200...\n");
 
     if (*total_price > 200.0) {
-        printf("You spent over %.2f pesos. You can proceed.\n", *total_price);
+        printf("\tYou spent over %.2f pesos. You can proceed.\n", *total_price);
     } else {
-        printf("Sorry, you didn't meet the qualified minimum spend. Please proceed to pay.\n");
+        printf("\tSorry, you didn't meet the qualified minimum spend. Please proceed to pay.\n");
         cashier_pay_process(counter, total_items, total_price); // Call the payment process function
         return;
     }
 
     // Ask for manager approval
-    printf("\nManager approval required.\n");
+    printf("\n\tManager approval required.\n");
 
-    printf("\nEnter manager username: ");
+    printf("\n\tEnter manager username: ");
     scanf("%s", manager_username);
 
-    printf("\nEnter manager password: ");
+    printf("\n\tEnter manager password: ");
     scanf("%s", manager_password);
 
     if (validate_manager_login(manager_username, manager_password)) {
         apply_discount(promo_code, total_price);
-        printf("New Total Amount to Pay: %.2f\n", *total_price);
+        printf("\tNew Total Amount to Pay: %.2f\n", *total_price);
     } else {
-        printf("\nInvalid manager credentials. Discount not applied.\n");
+        printf("\n\tInvalid manager credentials. Discount not applied.\n");
         press_any_key();
     }
 
     // Offer to proceed to pay or cancel
     int choice;
 
-    printf("\n[1] Pay now\n[2] Cancel\nEnter choice: ");
+    printf("\n\t[1] Pay now\n[2] Cancel\nEnter choice: ");
     scanf("%d", &choice);
 
     if (choice == 1) {
         // Proceed to paying
         cashier_pay_process(counter, total_items, total_price);
     } else {
-        printf("The Paying process has been cancelled...\n2");
+        printf("\tThe Paying process has been cancelled...\n2");
         // Reset the counter and return to the cashier menu
         reset_counter(counter, &total_items, total_price);
 
@@ -2333,7 +2596,7 @@ int get_confirmation(const char *message)
 {
     char confirmation;
 
-    printf("%s (Y/N): ", message);
+    printf("\t%s (Y/N): ", message);
     scanf(" %c", &confirmation);
 
     return (confirmation == 'Y' || confirmation == 'y');
@@ -2346,7 +2609,7 @@ void save_counter_to_csv(struct Product counter[], int total_items, const char *
 {
     FILE *file = fopen(filename, "w");
     if (file == NULL) {
-        printf("Could not open file %s for writing.\n", filename);
+        printf("\tCould not open file %s for writing.\n", filename);
         return;
     }
 
@@ -2365,7 +2628,7 @@ void modify_counter(struct Product counter[], int *total_items, float *total_pri
     int product_index = find_product_index(counter, *total_items, code);
 
     if (product_index == -1) {
-        printf("Product with code %s not found in the counter.\n", code);
+        printf("\tProduct with code %s not found in the counter.\n", code);
         return;
     }
 
@@ -2377,20 +2640,20 @@ void modify_counter(struct Product counter[], int *total_items, float *total_pri
                 counter[i] = counter[i + 1];
             }
             (*total_items)--;
-            printf("Product with code %s removed from the counter.\n", code);
+            printf("\tProduct with code %s removed from the counter.\n", code);
         } else {
-            printf("Item removal canceled.\n");
+            printf("\tItem removal canceled.\n");
         }
     } else {
         // Deduct the specified quantity from the product in the counter
         if (quantity > counter[product_index].quantity) {
-            printf("Cannot deduct more than what's in the counter. Deduction canceled.\n");
+            printf("\tCannot deduct more than what's in the counter. Deduction canceled.\n");
         } else if (get_confirmation("Are you sure you want to deduct the specified quantity?")) {
             counter[product_index].quantity -= quantity;
             *total_price -= counter[product_index].price * quantity;
-            printf("Deducted %d item(s) of product with code %s from the counter.\n", quantity, code);
+            printf("\tDeducted %d item(s) of product with code %s from the counter.\n", quantity, code);
         } else {
-            printf("Deduction canceled.\n");
+            printf("\tDeduction canceled.\n");
         }
     }
 
@@ -2408,12 +2671,12 @@ void ask_modify_counter(struct Product counter[], int *total_items, float *total
 
     display_counter(counter, *total_items, *total_price);
 
-    printf("Enter the Product Code you want to modify in the counter: ");
+    printf("\tEnter the Product Code you want to modify in the counter: ");
     scanf("%s", code);
 
-    printf("Enter the quantity to deduct or -1 to remove the product: ");
+    printf("\tEnter the quantity to deduct or -1 to remove the product: ");
     if (scanf("%d", &quantity) != 1) {
-        printf("Invalid input. Please enter a valid number.\n");
+        printf("\tInvalid input. Please enter a valid number.\n");
         press_any_key();
         return;
     }
@@ -2440,7 +2703,7 @@ void save_receipt_to_csv(struct Product cart[], int total_items, float total_pri
     // Open file for writing
     FILE *file = fopen(filename, "a");
     if (file == NULL) {
-        printf("Error opening file for writing.\n");
+        printf("\tError opening file for writing.\n");
         return;
     }
 
@@ -2462,9 +2725,762 @@ void save_receipt_to_csv(struct Product cart[], int total_items, float total_pri
     // Close file
     fclose(file);
 
-    printf("\nReceipt successfully saved\n");
+    printf("\n\tReceipt successfully saved\n");
 
     // Prompt user to continue
-    printf("\nPress any key and Enter to continue: ");
+    printf("\n\tPress any key and Enter to continue: ");
     scanf(" %c", &any);
 }
+
+
+
+//manager
+
+//change pass para sa register customer
+void account_change_password() {
+    char username[50];
+    char password[50];
+    char new_password[50];
+    char confirm_password[50];
+
+    // Ask for username
+    printf("\tEnter your username: ");
+    scanf("%s", username);
+
+    // Hide password input
+    printf("\tEnter your password: ");
+    int i = 0;
+    char ch;
+    while ((ch = _getch()) != '\r' && i < 49) { // Read characters until Enter is pressed
+        if (ch == '\b') { // Handle backspace
+            if (i > 0) {
+                printf("\b \b"); // Erase previous character
+                i--;
+            }
+        } else {
+            password[i++] = ch;
+            printf("*"); // Print asterisk for each character
+        }
+    }
+    password[i] = '\0'; // Null-terminate the password
+
+    // Authenticate user with username and password
+    int customer_index = -1;
+    for (int i = 0; i < customer_count; i++) {
+        if (strcmp(customers[i].username, username) == 0 && strcmp(customers[i].password, password) == 0) {
+            customer_index = i;
+            break;
+        }
+    }
+
+    if (customer_index == -1) {
+        printf("\n\tInvalid username or password. Please try again.\n");
+        return;
+    }
+
+    manager_code();
+
+    // Get new password and confirmation
+    printf("\tEnter new password: ");
+    i = 0;
+    while ((ch = _getch()) != '\r' && i < 49) { // Read characters until Enter is pressed
+        if (ch == '\b') { // Handle backspace
+            if (i > 0) {
+                printf("\b \b"); // Erase previous character
+                i--;
+            }
+        } else {
+            new_password[i++] = ch;
+            printf("*"); // Print asterisk for each character
+        }
+    }
+    new_password[i] = '\0'; // Null-terminate the password
+
+    printf("\n\tConfirm new password: ");
+    i = 0;
+    while ((ch = _getch()) != '\r' && i < 49) { // Read characters until Enter is pressed
+        if (ch == '\b') { // Handle backspace
+            if (i > 0) {
+                printf("\b \b"); // Erase previous character
+                i--;
+            }
+        } else {
+            confirm_password[i++] = ch;
+            printf("*"); // Print asterisk for each character
+        }
+    }
+    confirm_password[i] = '\0'; // Null-terminate the password
+
+    if (strcmp(new_password, confirm_password) != 0) {
+        printf("\n\tPasswords do not match. Please try again.\n");
+        return;
+    }
+
+    // Update password in memory
+    strcpy(customers[customer_index].password, new_password);
+
+    // Save all customers to the file to update the password change
+    save_all_customers_to_file();
+
+    printf("\n\tPassword changed successfully.\n");
+}
+
+//change password para sa admin user
+void change_cashier_password() {
+    char new_password[50];
+    char confirm_password[50];
+    FILE *file;
+
+    printf("Enter new password: ");
+    int i = 0;
+    char ch;
+    while ((ch = _getch()) != '\r' && i < 49) { // Read characters until Enter is pressed
+        if (ch == '\b') { // Handle backspace
+            if (i > 0) {
+                printf("\b \b"); // Erase previous character
+                i--;
+            }
+        } else {
+            new_password[i++] = ch;
+            printf("*"); // Print asterisk for each character
+        }
+    }
+    new_password[i] = '\0'; // Null-terminate the password
+
+    printf("\nConfirm new password: ");
+    i = 0;
+    while ((ch = _getch()) != '\r' && i < 49) { // Read characters until Enter is pressed
+        if (ch == '\b') { // Handle backspace
+            if (i > 0) {
+                printf("\b \b"); // Erase previous character
+                i--;
+            }
+        } else {
+            confirm_password[i++] = ch;
+            printf("*"); // Print asterisk for each character
+        }
+    }
+    confirm_password[i] = '\0'; // Null-terminate the password
+
+    if (strcmp(new_password, confirm_password) != 0) {
+        printf("\nPasswords do not match. Password change failed.\n");
+        return;
+    }
+
+    file = fopen("cashier_credentials.txt", "r+");
+    if (file == NULL) {
+        printf("Error: Could not open credentials file to verify the password.\n");
+        return;
+    }
+
+    char correct_username[50];
+    char correct_password[50];
+    fscanf(file, "%s %s", correct_username, correct_password);
+    fclose(file);
+
+    // Manager verification
+    int manager_code;
+    char choice;
+    do {
+        printf("\nEnter manager code: ");
+        scanf("%d", &manager_code);
+
+        switch (manager_code) {
+            case 1234:
+                file = fopen("cashier_credentials.txt", "a");
+                if (file == NULL) {
+                    printf("Error: Could not open credentials file to save the new password.\n");
+                    return;
+                }
+
+                fprintf(file, "%s %s\n", correct_username, new_password);
+                fclose(file);
+                printf("\nPassword changed successfully.\n");
+                press_any_key();
+                manager_menu();
+                break;
+            default:
+                printf("Incorrect manager code. Type [Y] to try again or [N] to go back? (Y/N): ");
+                char choice = getch(); // Use getch() to capture user input without displaying it
+
+                if (choice == 'N' || choice == 'n') {
+                    return;
+                } else if (choice != 'Y' && choice != 'y')
+                {
+                    printf("Invalid choice. Please enter B or P.\n");
+                    return;
+                }
+                break;
+        }
+    } while (choice != 'B' || choice != 'b');
+}
+
+
+
+//manager
+
+void manager_code() {
+    int manager_code;
+    char code_str[6]; // Assuming security code will not exceed 5 digits
+    int i;
+    char correct_username, new_password;
+    do {
+        printf("\nEnter your security code: ");
+
+        // Hide security code input
+        i = 0;
+        char ch;
+        while (1) {
+            ch = _getch(); // Use _getch() for Windows, use getch() on Unix/Linux
+            if (ch == '\r') { // Enter key pressed
+                break;
+            } else if (ch == 127 || ch == '\b') { // Backspace key pressed
+                if (i > 0) {
+                    printf("\b \b"); // Erase previous character
+                    i--;
+                }
+            } else if (i < 5 && ch >= '0' && ch <= '9') { // Only allow numeric input
+                code_str[i++] = ch;
+                printf("*"); // Print asterisk for each digit
+            }
+        }
+        code_str[i] = '\0'; // Null-terminate the input string
+
+        // Convert input string to integer
+        manager_code = atoi(code_str);
+
+        if (manager_code != 1234) {
+            printf("\nInvalid security code. Please try again.\n");
+            press_any_key();
+            account_change_password();
+        }
+
+    } while (manager_code != 1234);
+}
+
+
+void user_manager()
+{
+    manager_login();
+}
+void manager_login() {
+    char username[50], password[50];
+    int valid = 0; // Indicate if login is valid
+    int attempt_count = 0; // Count failed login attempts
+
+    while (!valid) { // Loop until valid login
+        printf("\t===================================\n");
+        printf("\t|                                 |\n");
+        printf("\t|          Manager Login          |\n");
+        printf("\t|                                 |\n");
+        printf("\t===================================\n");
+        printf("\n\tEnter Username: ");
+        scanf("%s", username);
+
+        // Clear input buffer
+        int c;
+        while ((c = getchar()) != '\n' && c != EOF);
+
+        printf("\n\tEnter password: ");
+
+        // Hide password input
+        int i = 0;
+        char ch;
+        while (1) {
+            ch = _getch(); // Use _getch() for Windows, use getch() on Unix/Linux
+            if (ch == '\r') { // Enter key pressed
+                break;
+            } else if (ch == 127 || ch == '\b') { // Backspace key pressed
+                if (i > 0) {
+                    printf("\b \b"); // Erase previous character
+                    i--;
+                }
+            } else if (i < 49) {
+                password[i++] = ch;
+                printf("*"); // Print asterisk for each character
+            }
+        }
+        password[i] = '\0'; // Null-terminate the password
+
+        printf("\n");
+
+        // Validate login
+        if (user_validate_manager_login(username, password)) {
+            printf("\tLogin successful!\n");
+            valid = 1; // Set flag to exit loop
+            manager_menu();
+        } else {
+            attempt_count++;
+            printf("\n\tInvalid username or password. Attempt %d/%d\n", attempt_count, MAX_ATTEMPTS);
+            if (attempt_count >= MAX_ATTEMPTS) {
+                printf("\tDue to multiple wrong attempts, your account has been revoked.\n");
+                break; // Exit the loop if maximum attempts are reached
+            }
+        }
+    }
+}
+
+
+int user_validate_manager_login(char username[], char password[]) {
+    char correct_username[50];
+    char correct_password[50];
+    FILE *file = fopen("manager_credentials.txt", "a");
+
+    if (file == NULL) {
+        printf("\tError: Could not open credentials file.\n");
+        return 0; // Consider login invalid if file can't be read
+    }
+
+    fscanf(file, "%s %s", correct_username, correct_password);
+    fclose(file);
+
+    // Compare entered credentials with correct ones
+    if (strcmp(username, correct_username) == 0 && strcmp(password, correct_password) == 0) {
+        return 1; // Credentials are correct
+    } else {
+        return 0; // Credentials are incorrect
+    }
+}
+
+void manager_menu() {
+
+    int choice;
+    do {
+        system("cls");
+        printf("=======================================\n");
+        printf("|                                     |\n");
+        printf("|          Manager Dashboard          |\n");
+        printf("|                                     |\n");
+        printf("=======================================\n\n");
+        printf("[1] Cashier Screen\n");
+        printf("[2] Sales Report\n");
+        printf("[3] Audit Receipts\n");
+        printf("[4] Cashier Account Retrieval\n");
+        printf("[5] User Account Retrieval\n");
+        printf("[0] Logout\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                selecting_queue_list_to_process();
+                break;
+            case 2:
+                press_any_key();
+                break;
+            case 3:
+                press_any_key();
+                break;
+            case 4:
+                account_retrieval();
+                break;
+            case 5:
+                account_user_change_password();
+                break;
+            case 0:
+                char confirm_choice;
+                printf("\nAre you sure you want to logout? (Y/N): ");
+                scanf(" %c", &confirm_choice);
+
+                if (confirm_choice == 'Y' || confirm_choice == 'y') {
+                    user_type_choice();
+                } else if(confirm_choice == 'N'|| confirm_choice == 'n'){
+                    manager_menu();
+                }else{
+                    printf("\nInvalid input. Please type [Y] for yes or [N] for no");
+                    press_any_key();
+                }
+                break;
+            default:
+                printf("Invalid choice. Please enter a number between 0-4.\n");
+                press_any_key();
+        }
+    } while (choice != 0);
+}
+
+
+void account_retrieval()
+{
+    int account_retrieval_choice;
+
+    printf("Account Retrieval\n\n");
+    printf("[1] Account unlock\n");
+    printf("[2] Password reset\n\n");
+    printf("[0] Go Back\n\n");
+
+    printf("Enter your choice: ");
+    scanf("%d", &account_retrieval_choice);
+
+    do{
+        switch (account_retrieval_choice) {
+            case 1:
+                printf("Guamagana");
+                break;
+            case 2:
+                change_cashier_password();
+                break;
+            case 0:
+                manager_menu();
+                break;
+            default:
+                printf("Invalid input. Please select from 0-2");
+                break;
+        }
+    }while(account_retrieval_choice != 0);
+}
+
+
+
+void change_manager_password()
+{
+    char current_password[50], new_password[50], confirm_password[50];
+    char username[50], correct_password[50];
+
+    FILE *file = fopen("manager_credentials.txt", "a");
+
+    if (file == NULL) {
+        printf("\tError: Could not open credentials file.\n");
+        return;
+    }
+
+    fscanf(file, "%s %s", username, correct_password);
+    fclose(file);
+
+    printf("\n\tChange Password\n\n");
+    printf("\tEnter current password: ");
+
+    // Hide current password input
+    int i = 0;
+    char ch;
+
+    while ((ch = getchar()) != '\n' && i < 49) {
+        if (ch == 127 || ch == '\b') { // Handle backspace
+            if (i > 0) {
+                printf("\b \b"); // Erase previous character
+                i--;
+            }
+        } else {
+            current_password[i++] = ch;
+            printf("*"); // Print asterisk for each character
+        }
+    }
+    current_password[i] = '\0'; // Null-terminate the password
+
+    printf("\n");
+
+    if (strcmp(current_password, correct_password) != 0) {
+        printf("\tCurrent password is incorrect.\n");
+        return;
+    }
+
+    printf("\tEnter new password: ");
+    i = 0;
+    while ((ch = getchar()) != '\n' && i < 49) {
+        if (ch == 127 || ch == '\b') { // Handle backspace
+            if (i > 0) {
+                printf("\b \b"); // Erase previous character
+                i--;
+            }
+        } else {
+            new_password[i++] = ch;
+            printf("*"); // Print asterisk for each character
+        }
+    }
+    new_password[i] = '\0'; // Null-terminate the password
+
+    printf("\n");
+
+    printf("\tConfirm new password: ");
+    i = 0;
+    while ((ch = getchar()) != '\n' && i < 49) {
+        if (ch == 127 || ch == '\b') { // Handle backspace
+            if (i > 0) {
+                printf("\b \b"); // Erase previous character
+                i--;
+            }
+        } else {
+            confirm_password[i++] = ch;
+            printf("*"); // Print asterisk for each character
+        }
+    }
+    confirm_password[i] = '\0'; // Null-terminate the password
+
+    printf("\n");
+
+    if (strcmp(new_password, confirm_password) != 0) {
+        printf("\tNew passwords do not match.\n");
+        return;
+    }
+
+    // Update password in the credentials file
+    file = fopen("manager_credentials.txt", "a");
+    if (file == NULL) {
+        printf("\tError: Could not open credentials file for writing.\n");
+        return;
+    }
+
+    fprintf(file, "%s %s\n", username, new_password);
+    fclose(file);
+
+    printf("\tPassword changed successfully!\n");
+}
+
+
+
+
+void account_user_change_password()
+{
+    char choice;
+    int manager_code;
+    char code_str[50];
+
+    load_customers_from_file();
+
+    printf("Do you want to retrieve account (1) or change password (2)? Enter choice: ");
+    scanf(" %c", &choice);
+
+    while (1) {
+        printf("\tEnter manager code: ");
+        int i = 0;
+        char ch;
+        while ((ch = _getch()) != '\r' && i < 49) { // Read characters until Enter is pressed
+            if (ch == '\b') { // Handle backspace
+                if (i > 0) {
+                    printf("\b \b"); // Erase previous character
+                    i--;
+                }
+            } else {
+                code_str[i++] = ch;
+                printf("*"); // Print asterisk for each character
+            }
+        }
+        code_str[i] = '\0'; // Null-terminate the input
+
+        // Convert the string to an integer
+        manager_code = atoi(code_str);
+
+        if (manager_code == 1234) {
+            break;
+        } else {
+            printf("\n\tIncorrect manager code. Please try again.\n");
+        }
+    }
+
+    char username[50];
+
+    while (1) {
+        printf("\n\tEnter Username: ");
+        scanf("%s", username);
+
+        // Find the customer by username
+        int customer_index = -1;
+        for (int i = 0; i < customer_count; i++) {
+            if (strcmp(customers[i].username, username) == 0) {
+                customer_index = i;
+                break;
+            }
+        }
+
+        if (customer_index == -1) {
+            printf("\n\tUsername not found. Please try again.\n");
+            continue;
+        }
+
+        if (choice == '1') {
+            user_retrieve_account(customer_index);
+        } else if (choice == '2') {
+            password_account_change(customer_index);
+        } else {
+            printf("\n\tInvalid choice. Please try again.\n");
+        }
+        return;
+    }
+}
+
+
+
+void user_retrieve_account(int customer_index) {
+    char new_password[50];
+    char confirm_password[50];
+    int i;
+    char ch;
+
+    printf("\tEnter new Password: ");
+    i = 0;
+    while ((ch = _getch()) != '\r' && i < 49) { // Read characters until Enter is pressed
+        if (ch == '\b') { // Handle backspace
+            if (i > 0) {
+                printf("\b \b"); // Erase previous character
+                i--;
+            }
+        } else {
+            new_password[i++] = ch;
+            printf("*"); // Print asterisk for each character
+        }
+    }
+    new_password[i] = '\0'; // Null-terminate the password
+
+    printf("\n\tConfirm new Password: ");
+    i = 0;
+    while ((ch = _getch()) != '\r' && i < 49) { // Read characters until Enter is pressed
+        if (ch == '\b') { // Handle backspace
+            if (i > 0) {
+                printf("\b \b"); // Erase previous character
+                i--;
+            }
+        } else {
+            confirm_password[i++] = ch;
+            printf("*"); // Print asterisk for each character
+        }
+    }
+    confirm_password[i] = '\0'; // Null-terminate the password
+
+    printf("\n");
+
+    // Check if the passwords match
+    if (strcmp(new_password, confirm_password) != 0) {
+        printf("\n\tPasswords do not match. Please try again.\n");
+        return;
+    }
+
+    // Update the customer's password in memory
+    strcpy(customers[customer_index].password, new_password);
+
+    // Save the updated customers to the file
+    FILE *file = fopen(CUSTOMER_FILE, "w");  // Open file in write mode
+    if (file == NULL) {
+        printf("\n\tError: Could not open file for writing.\n");
+        return;
+    }
+
+    for (int i = 0; i < customer_count; i++) {
+        fprintf(file, "%s %s %s %s %.2f\n", customers[i].username, customers[i].password, customers[i].phone_number, customers[i].payment_method, customers[i].balance);
+    }
+
+    fclose(file);
+
+    printf("\n\tPassword updated successfully.\n");
+
+    // Ask user for next action
+    char next_action;
+    printf("\n\tDo you want to go back to manager menu (M) or return to menu (U)? ");
+    scanf(" %c", &next_action);
+
+    if (next_action == 'M' || next_action == 'm') {
+        manager_menu();
+    } else {
+        user_type_choice();
+    }
+}
+
+
+
+void password_account_change(int customer_index) {
+    char current_password[50];
+    char new_password[50];
+    char confirm_password[50];
+    int attempt_count = 0;
+    int max_attempts = 5;
+    int i;
+    char ch;
+
+    while (attempt_count < max_attempts) {
+        printf("\tEnter current Password: ");
+        i = 0;
+        while ((ch = _getch()) != '\r' && i < 49) { // Read characters until Enter is pressed
+            if (ch == '\b') { // Handle backspace
+                if (i > 0) {
+                    printf("\b \b"); // Erase previous character
+                    i--;
+                }
+            } else {
+                current_password[i++] = ch;
+                printf("*"); // Print asterisk for each character
+            }
+        }
+        current_password[i] = '\0'; // Null-terminate the password
+
+        printf("\n");
+
+        // Validate the current password
+        if (strcmp(customers[customer_index].password, current_password) != 0) {
+            attempt_count++;
+            printf("\n\tCurrent password is incorrect. Attempt %d of %d.\n", attempt_count, max_attempts);
+            if (attempt_count == max_attempts) {
+                printf("\n\tYou have reached the maximum attempts. Returning to manager menu.\n");
+                manager_menu();
+                return;
+            }
+            continue;
+        }
+
+        printf("\tEnter new Password: ");
+        i = 0;
+        while ((ch = _getch()) != '\r' && i < 49) { // Read characters until Enter is pressed
+            if (ch == '\b') { // Handle backspace
+                if (i > 0) {
+                    printf("\b \b"); // Erase previous character
+                    i--;
+                }
+            } else {
+                new_password[i++] = ch;
+                printf("*"); // Print asterisk for each character
+            }
+        }
+        new_password[i] = '\0'; // Null-terminate the password
+
+        printf("\n\tConfirm new Password: ");
+        i = 0;
+        while ((ch = _getch()) != '\r' && i < 49) { // Read characters until Enter is pressed
+            if (ch == '\b') { // Handle backspace
+                if (i > 0) {
+                    printf("\b \b"); // Erase previous character
+                    i--;
+                }
+            } else {
+                confirm_password[i++] = ch;
+                printf("*"); // Print asterisk for each character
+            }
+        }
+        confirm_password[i] = '\0'; // Null-terminate the password
+
+        printf("\n");
+
+        // Check if the passwords match
+        if (strcmp(new_password, confirm_password) != 0) {
+            printf("\n\tPasswords do not match. Please try again.\n");
+            return;
+        }
+
+        // Update the customer's password
+        strcpy(customers[customer_index].password, new_password);
+
+        // Save the updated customer to the file
+        FILE *file = fopen(CUSTOMER_FILE, "w");
+        if (file == NULL) {
+            printf("\n\tError: Could not open file for writing.\n");
+            return;
+        }
+
+        for (int i = 0; i < customer_count; i++) {
+            fprintf(file, "%s %s %s %s %.2f\n", customers[i].username, customers[i].password, customers[i].phone_number, customers[i].payment_method, customers[i].balance);
+        }
+
+        fclose(file);
+
+        printf("\n\tPassword updated successfully.\n");
+
+        // Ask user for next action
+        char next_action;
+        printf("\n\tDo you want to go back to manager menu (M) or return to menu (U)? ");
+        scanf(" %c", &next_action);
+
+        if (next_action == 'M' || next_action == 'm') {
+            manager_menu();
+        } else {
+            user_type_choice();
+        }
+        return;
+    }
+}
+
