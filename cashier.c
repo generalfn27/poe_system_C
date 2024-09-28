@@ -265,7 +265,7 @@ void generate_receipt(struct Product cart[], int total_items, float total_price,
 void add_funds(char* username);
 void guest_process();
 
-void view_cart(struct Product cart[], int total_items, float total_price);
+void view_cart(int total_items, float total_price);
 void display_cart(struct Product cart[], int total_items, float total_price);
 
 //functions to show products
@@ -790,7 +790,7 @@ void browse_detergent_soaps(int *queue_number)
 
 /*****END*********************END***********END***********END************END************END************END************END************END************END************END************END*****/
 
-void view_cart(struct Product cart[], int total_items, float total_price)
+void view_cart(int total_items, float total_price)
 {
     system("cls");
 
@@ -937,7 +937,7 @@ void guest_menu_customer_process (struct Product cart[], int *total_items, float
 
     do {
         // Display cart after processing each order
-        view_cart(cart, *total_items, *total_price);
+        view_cart(*total_items, *total_price);
 
         // Prompt user to add more items or proceed to checkout
         printf("\tAdd more items (A)\n");
@@ -958,18 +958,18 @@ void guest_menu_customer_process (struct Product cart[], int *total_items, float
                 break;
             case 'R':
             case 'r':
-                view_cart(cart, *total_items, *total_price);
+                view_cart(*total_items, *total_price);
                 ask_remove(cart, total_items, total_price);
                 break;
             case 'D':
             case 'd':
-                view_cart(cart, *total_items, *total_price);
+                view_cart(*total_items, *total_price);
                 ask_deduct(cart, total_items, total_price);
                 break;
             case 'C':
             case 'c':
                 reset_cart(cart, total_items, total_price);
-                view_cart(cart, *total_items, *total_price);
+                view_cart(*total_items, *total_price);
                 break;
             case 'B':
             case 'b':
@@ -1726,7 +1726,7 @@ void registered_user_menu_customer_process (struct Product cart[], int *total_it
 
     do {
         // Display cart after processing each order
-        view_cart(cart, *total_items, *total_price);
+        view_cart(*total_items, *total_price);
 
         // Prompt user to add more items or proceed to checkout
         printf("\n\tAdd more items (A)\n");
@@ -1747,18 +1747,18 @@ void registered_user_menu_customer_process (struct Product cart[], int *total_it
                 break;
             case 'R':
             case 'r':
-                view_cart(cart, *total_items, *total_price);
+                view_cart(*total_items, *total_price);
                 ask_remove(cart, total_items, total_price);
                 break;
             case 'D':
             case 'd':
-                view_cart(cart, *total_items, *total_price);
+                view_cart(*total_items, *total_price);
                 ask_deduct(cart, total_items, total_price);
                 break;
             case 'C':
             case 'c':
                 reset_cart(cart, total_items, total_price);
-                view_cart(cart, *total_items, *total_price);
+                view_cart(*total_items, *total_price);
                 break;
             case 'B':
             case 'b':
