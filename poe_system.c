@@ -360,6 +360,7 @@ void user_retrieve_account(int customer_index);
 int main()
 {
     //system("color F0"); //changes text color "F0", "F1", "F2" etc.
+    generate_default_admin_credentials();
     user_type_choice();
 
     return 0;
