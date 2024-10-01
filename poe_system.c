@@ -1763,7 +1763,8 @@ void registered_user_menu_customer_process (struct Product cart[], int *total_it
                 break;
             case 'B':
             case 'b':
-                guest_customer_item_category();
+                //guest_customer_item_category(); bug tong part na to nalipat sa guest eh
+                registered_user_customer_item_category(username, balance,registered_payment_method);
                 break;
             case 'P':
             case 'p':
