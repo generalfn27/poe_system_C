@@ -17,7 +17,7 @@
 rule C_COMPILER__inpr_project_devc_supported_unscanned_Debug
   depfile = $DEP_FILE
   deps = gcc
-  command = ${LAUNCHER}${CODE_CHECK}"E:\CLion 2\bin\mingw\bin\gcc.exe" $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
+  command = ${LAUNCHER}${CODE_CHECK}"E:\JetBrains\CLion 2\bin\mingw\bin\gcc.exe" $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
   description = Building C object $out
 
 
@@ -25,7 +25,7 @@ rule C_COMPILER__inpr_project_devc_supported_unscanned_Debug
 # Rule for linking C executable.
 
 rule C_EXECUTABLE_LINKER__inpr_project_devc_supported_Debug
-  command = C:\WINDOWS\system32\cmd.exe /C "$PRE_LINK && "E:\CLion 2\bin\mingw\bin\gcc.exe" $FLAGS $LINK_FLAGS $in -o $TARGET_FILE -Wl,--out-implib,$TARGET_IMPLIB -Wl,--major-image-version,0,--minor-image-version,0 $LINK_PATH $LINK_LIBRARIES && $POST_BUILD"
+  command = C:\WINDOWS\system32\cmd.exe /C "$PRE_LINK && "E:\JetBrains\CLion 2\bin\mingw\bin\gcc.exe" $FLAGS $LINK_FLAGS $in -o $TARGET_FILE -Wl,--out-implib,$TARGET_IMPLIB -Wl,--major-image-version,0,--minor-image-version,0 $LINK_PATH $LINK_LIBRARIES && $POST_BUILD"
   description = Linking C executable $TARGET_FILE
   restat = $RESTAT
 
@@ -36,7 +36,7 @@ rule C_EXECUTABLE_LINKER__inpr_project_devc_supported_Debug
 rule C_COMPILER__customer_unscanned_Debug
   depfile = $DEP_FILE
   deps = gcc
-  command = ${LAUNCHER}${CODE_CHECK}"E:\CLion 2\bin\mingw\bin\gcc.exe" $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
+  command = ${LAUNCHER}${CODE_CHECK}"E:\JetBrains\CLion 2\bin\mingw\bin\gcc.exe" $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
   description = Building C object $out
 
 
@@ -44,7 +44,7 @@ rule C_COMPILER__customer_unscanned_Debug
 # Rule for linking C executable.
 
 rule C_EXECUTABLE_LINKER__customer_Debug
-  command = C:\WINDOWS\system32\cmd.exe /C "$PRE_LINK && "E:\CLion 2\bin\mingw\bin\gcc.exe" $FLAGS $LINK_FLAGS $in -o $TARGET_FILE -Wl,--out-implib,$TARGET_IMPLIB -Wl,--major-image-version,0,--minor-image-version,0 $LINK_PATH $LINK_LIBRARIES && $POST_BUILD"
+  command = C:\WINDOWS\system32\cmd.exe /C "$PRE_LINK && "E:\JetBrains\CLion 2\bin\mingw\bin\gcc.exe" $FLAGS $LINK_FLAGS $in -o $TARGET_FILE -Wl,--out-implib,$TARGET_IMPLIB -Wl,--major-image-version,0,--minor-image-version,0 $LINK_PATH $LINK_LIBRARIES && $POST_BUILD"
   description = Linking C executable $TARGET_FILE
   restat = $RESTAT
 
@@ -55,7 +55,7 @@ rule C_EXECUTABLE_LINKER__customer_Debug
 rule C_COMPILER__cashier_unscanned_Debug
   depfile = $DEP_FILE
   deps = gcc
-  command = ${LAUNCHER}${CODE_CHECK}"E:\CLion 2\bin\mingw\bin\gcc.exe" $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
+  command = ${LAUNCHER}${CODE_CHECK}"E:\JetBrains\CLion 2\bin\mingw\bin\gcc.exe" $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
   description = Building C object $out
 
 
@@ -63,7 +63,7 @@ rule C_COMPILER__cashier_unscanned_Debug
 # Rule for linking C executable.
 
 rule C_EXECUTABLE_LINKER__cashier_Debug
-  command = C:\WINDOWS\system32\cmd.exe /C "$PRE_LINK && "E:\CLion 2\bin\mingw\bin\gcc.exe" $FLAGS $LINK_FLAGS $in -o $TARGET_FILE -Wl,--out-implib,$TARGET_IMPLIB -Wl,--major-image-version,0,--minor-image-version,0 $LINK_PATH $LINK_LIBRARIES && $POST_BUILD"
+  command = C:\WINDOWS\system32\cmd.exe /C "$PRE_LINK && "E:\JetBrains\CLion 2\bin\mingw\bin\gcc.exe" $FLAGS $LINK_FLAGS $in -o $TARGET_FILE -Wl,--out-implib,$TARGET_IMPLIB -Wl,--major-image-version,0,--minor-image-version,0 $LINK_PATH $LINK_LIBRARIES && $POST_BUILD"
   description = Linking C executable $TARGET_FILE
   restat = $RESTAT
 
@@ -74,7 +74,7 @@ rule C_EXECUTABLE_LINKER__cashier_Debug
 rule C_COMPILER__poe_unscanned_Debug
   depfile = $DEP_FILE
   deps = gcc
-  command = ${LAUNCHER}${CODE_CHECK}"E:\CLion 2\bin\mingw\bin\gcc.exe" $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
+  command = ${LAUNCHER}${CODE_CHECK}"E:\JetBrains\CLion 2\bin\mingw\bin\gcc.exe" $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
   description = Building C object $out
 
 
@@ -82,7 +82,7 @@ rule C_COMPILER__poe_unscanned_Debug
 # Rule for linking C executable.
 
 rule C_EXECUTABLE_LINKER__poe_Debug
-  command = C:\WINDOWS\system32\cmd.exe /C "$PRE_LINK && "E:\CLion 2\bin\mingw\bin\gcc.exe" $FLAGS $LINK_FLAGS $in -o $TARGET_FILE -Wl,--out-implib,$TARGET_IMPLIB -Wl,--major-image-version,0,--minor-image-version,0 $LINK_PATH $LINK_LIBRARIES && $POST_BUILD"
+  command = C:\WINDOWS\system32\cmd.exe /C "$PRE_LINK && "E:\JetBrains\CLion 2\bin\mingw\bin\gcc.exe" $FLAGS $LINK_FLAGS $in -o $TARGET_FILE -Wl,--out-implib,$TARGET_IMPLIB -Wl,--major-image-version,0,--minor-image-version,0 $LINK_PATH $LINK_LIBRARIES && $POST_BUILD"
   description = Linking C executable $TARGET_FILE
   restat = $RESTAT
 
@@ -99,7 +99,7 @@ rule CUSTOM_COMMAND
 # Rule for re-running cmake.
 
 rule RERUN_CMAKE
-  command = "E:\CLion 2\bin\cmake\win\x64\bin\cmake.exe" --regenerate-during-build -SE:\Clion\inpr_project_poe_system -BE:\Clion\inpr_project_poe_system\cmake-build-debug
+  command = "E:\JetBrains\CLion 2\bin\cmake\win\x64\bin\cmake.exe" --regenerate-during-build -SE:\Clion\inpr_project_poe_system -BE:\Clion\inpr_project_poe_system\cmake-build-debug
   description = Re-running CMake...
   generator = 1
 
@@ -108,7 +108,7 @@ rule RERUN_CMAKE
 # Rule for cleaning all built files.
 
 rule CLEAN
-  command = "E:\CLion 2\bin\ninja\win\x64\ninja.exe" $FILE_ARG -t clean $TARGETS
+  command = "E:\JetBrains\CLion 2\bin\ninja\win\x64\ninja.exe" $FILE_ARG -t clean $TARGETS
   description = Cleaning all built files...
 
 
@@ -116,6 +116,6 @@ rule CLEAN
 # Rule for printing all primary targets available.
 
 rule HELP
-  command = "E:\CLion 2\bin\ninja\win\x64\ninja.exe" -t targets
+  command = "E:\JetBrains\CLion 2\bin\ninja\win\x64\ninja.exe" -t targets
   description = All primary targets available:
 

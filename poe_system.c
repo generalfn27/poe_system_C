@@ -7,6 +7,8 @@
 #include <conio.h>
 #include <windows.h>
 
+//edit to lahat pwedeng di na declare mga pointer sa paramenter
+
 #define BOLD "\x1B[1m"
 #define MAX_CUSTOMERS 100
 #define CUSTOMER_FILE "customers.txt"
