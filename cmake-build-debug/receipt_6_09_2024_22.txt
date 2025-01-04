@@ -1,0 +1,10 @@
+Code,Name,Quantity,Price
+DAR011,Nestle Cream,7,65.25
+
+Total Price: ,456.75
+Payment: ,456.75
+Code,Name,Quantity,Price
+,,0,0.00
+
+Total Price: ,2015.00
+Payment: ,2015.00
