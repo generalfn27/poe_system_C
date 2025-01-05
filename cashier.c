@@ -2959,10 +2959,11 @@ void manager_code() {
 }
 
 
-void user_manager()
-{
+void user_manager() {
     manager_login();
 }
+
+
 void manager_login() {
     char username[50], password[50];
     int valid = 0; // Indicate if login is valid
