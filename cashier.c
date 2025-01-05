@@ -3098,8 +3098,7 @@ void manager_menu() {
 }
 
 
-void account_retrieval()
-{
+void account_retrieval() {
     int account_retrieval_choice;
 
     printf("Account Retrieval\n\n");
