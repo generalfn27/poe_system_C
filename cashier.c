@@ -923,16 +923,12 @@ void reset_cart(struct Product cart[], int *total_items, float *total_price)
     *total_price = 0.0;
 
     printf("\tCart has been reset.\n");
-
-    return;
 }
-
 
 /*****END*********************END***********END***********END************END************END************END************END************END************END************END************END*****/
 
 
-void guest_menu_customer_process (struct Product cart[], int *total_items, float *total_price)
-{
+void guest_menu_customer_process (struct Product cart[], int *total_items, float *total_price) {
     char choice;
 
     do {
